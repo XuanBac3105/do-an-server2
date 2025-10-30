@@ -14,7 +14,7 @@ export class LoggingInterceptor implements NestInterceptor {
         const now = Date.now()
 
         this.logger.log(`Incoming Request: ${method} ${url} - IP: ${ip} - UserAgent: ${userAgent}`)
-        
+
         if (body && typeof body === 'object' && Object.keys(body).length > 0) {
             this.logger.debug(`Request Body: ${JSON.stringify(body)}`)
         }
@@ -25,11 +25,9 @@ export class LoggingInterceptor implements NestInterceptor {
                     const response = context.switchToHttp().getResponse()
                     const { statusCode } = response
                     const executionTime = Date.now() - now
-                    
-                    this.logger.log(
-                        `Outgoing Response: ${method} ${url} - Status: ${statusCode} - ${executionTime}ms`
-                    )
-                    
+
+                    this.logger.log(`Outgoing Response: ${method} ${url} - Status: ${statusCode} - ${executionTime}ms`)
+
                     if (data) {
                         this.logger.debug(`Response Data: ${JSON.stringify(data)}`)
                     }
@@ -38,10 +36,10 @@ export class LoggingInterceptor implements NestInterceptor {
                     const executionTime = Date.now() - now
                     this.logger.error(
                         `Request Failed: ${method} ${url} - ${executionTime}ms - Error: ${error.message}`,
-                        error.stack
+                        error.stack,
                     )
-                }
-            })
+                },
+            }),
         )
     }
 }

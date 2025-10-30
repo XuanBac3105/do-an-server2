@@ -20,7 +20,10 @@ const configSchema = z.object({
     ADMIN_PASSWORD: z.string(),
     ADMIN_EMAIL: z.string(),
     ADMIN_PHONE_NUMBER: z.string(),
-    // RESEND_API_KEY: z.string(),
+    RESEND_API_KEY: z.string(),
+    MINIO_ENDPOINT: z.string(),
+    MINIO_ACCESS_KEY: z.string(),
+    MINIO_SECRET_KEY: z.string(),
 })
 
 const configServer = configSchema.safeParse(process.env)

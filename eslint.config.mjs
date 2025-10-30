@@ -39,7 +39,8 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-return': 'off',
       'no-useless-catch': 'off',
       '@typescript-eslint/await-thenable': 'off',
-      'prefer-const': 'off'
+      'prefer-const': 'off',
+      '@typescript-eslint/unbound-method': 'off',
     },
   },
 );

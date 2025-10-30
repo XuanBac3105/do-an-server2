@@ -78,7 +78,7 @@ model User {
   fullName     String   @db.VarChar(150)
   email        String   @unique @db.VarChar(255)
   passwordHash String   @db.Char(255)
-  phone        String?  @db.VarChar(30)
+  phone        String   @db.VarChar(30)
   role         Role     @default(student)
   avatarMediaId Int?    
   isActive     Boolean  @default(true) 
