@@ -3,7 +3,7 @@ import { AuthRepo } from './auth.repo'
 import { HashingService } from 'src/shared/services/hashing.service'
 import { SharedUserRepo } from 'src/shared/repos/shared-user.repo'
 import { AuthType, RegisterReqType } from './auth.type'
-import { Role } from '../../generated/prisma-client'
+import { Role } from '@prisma/client'
 
 @Injectable()
 export class AuthService {

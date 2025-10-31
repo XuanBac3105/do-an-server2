@@ -3,7 +3,7 @@ import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import { RegisterReqDto } from './auth.dto'
 import { UnprocessableEntityException } from '@nestjs/common'
-import { Role } from '../../generated/prisma-client'
+import { Role } from '@prisma/client'
 
 describe('AuthController', () => {
     let controller: AuthController
