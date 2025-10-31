@@ -30,6 +30,6 @@ jobs:
     - name: Generate Prisma Client
       env:
         DATABASE_URL: "${{ secrets.DATABASE_URL }}"
-      run: npx prisma generate
+      run: npx prisma generate --schema=./prisma/schema.prisma
     - run: npm run build --if-present
     - run: npm test
