@@ -1,4 +1,4 @@
-import { Role } from '../../../prisma/generated/prisma-client'
+import { Role } from '../../../generated/prisma-client'
 import z from 'zod'
 
 export const UserSchema = z.object({
