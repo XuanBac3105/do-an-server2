@@ -1,10 +1,9 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common'
 import { AuthRepo } from './auth.repo'
-import { RegisterReqDto, RegisterResDto } from './auth.dto'
 import { HashingService } from 'src/shared/services/hashing.service'
 import { SharedUserRepo } from 'src/shared/repos/shared-user.repo'
 import { AuthType, RegisterReqType } from './auth.type'
-import { Role } from '@prisma/client'
+import { Role } from '../../prisma/generated/prisma-client'
 
 @Injectable()
 export class AuthService {
