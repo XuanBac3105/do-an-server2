@@ -30,11 +30,11 @@ services:
       db:
         condition: service_healthy
     restart: always
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
 
 volumes:
   db_data:

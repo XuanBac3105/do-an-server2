@@ -1,0 +1,386 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model OtpRecord {
+  id        BigInt   @id @default(autoincrement())
+  email     String   @db.VarChar(255)
+  OtpCode   String   @db.Char(64)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  expiresAt DateTime @db.Timestamp(0)
+
+  @@index([email, OtpCode, expiresAt(sort: Desc)], map: "IX_OtpRecords_Email_Code")
+}
+
+// =========================================
+// REFRESH TOKENS
+// =========================================
+
+model RefreshToken {
+  id             BigInt    @id @default(autoincrement())
+  userId         Int
+  tokenHash      String    @db.Char(64)
+  issuedAt       DateTime  @default(now()) @db.Timestamp(0)
+  expiresAt      DateTime  @db.Timestamp(0)
+  revokedAt      DateTime? @db.Timestamp(0)
+  replacedByHash String?   @db.Char(64)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([tokenHash], map: "UQ_RefreshTokens_TokenHash")
+  @@index([userId, expiresAt(sort: Desc)], map: "IX_RefreshTokens_User_Expires")
+  @@index([replacedByHash], map: "IX_RefreshTokens_Replaced")
+}
+
+model Media {
+  id         Int      @id @default(autoincrement())
+  disk       String   @db.VarChar(30)
+  bucket     String?  @db.VarChar(100)
+  objectKey  String   @db.VarChar(700)
+  mimeType   String?  @db.VarChar(100)
+  sizeBytes  BigInt?
+  visibility String   @default("private") @db.VarChar(10)
+  uploadedBy Int?
+  createdAt  DateTime @default(now()) @db.Timestamp(0)
+
+  uploader                User?                    @relation("MediaUploadedBy", fields: [uploadedBy], references: [id])
+  userAvatars             User[]                   @relation("UserAvatar")
+  classroomCovers         Classroom[]
+  materials               Material[]
+  exerciseAttachments     Exercise[]
+  exerciseSubmissions     ExerciseSubmission[]
+  quizQuestionGroupMedias QuizQuestionGroupMedia[]
+  quizQuestionMedias      QuizQuestionMedia[]
+  quizOptionMedias        QuizOptionMedia[]
+
+  @@unique([bucket, objectKey], map: "UQ_Media_Bucket_Key")
+}
+
+enum Role {
+  student
+  admin
+  rootAdmin
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  fullName      String   @db.VarChar(150)
+  email         String   @unique @db.VarChar(255)
+  passwordHash  String   @db.Char(255)
+  phone         String   @db.VarChar(30)
+  role          Role     @default(student)
+  avatarMediaId Int?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime @default(now()) @updatedAt @db.Timestamp(0)
+
+  avatarMedia         Media?               @relation("UserAvatar", fields: [avatarMediaId], references: [id])
+  uploadedMedia       Media[]              @relation("MediaUploadedBy")
+  taughtClassrooms    Classroom[]          @relation("ClassroomTeacher")
+  createdClassrooms   Classroom[]          @relation("ClassroomCreator")
+  classroomStudents   ClassroomStudent[]
+  joinRequests        JoinRequest[]        @relation("JoinRequestStudent")
+  uploadedMaterials   Material[]
+  createdExercises    Exercise[]
+  exerciseSubmissions ExerciseSubmission[]
+  createdQuizzes      Quiz[]
+  quizAttempts        QuizAttempt[]
+  refreshTokens       RefreshToken[]
+}
+
+// =========================================
+// CLASSROOMS & MEMBERSHIP
+// =========================================
+
+model Classroom {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(200)
+  description  String?
+  tutorId      Int
+  coverMediaId Int?
+  isArchived   Boolean  @default(false)
+  createdBy    Int
+  createdAt    DateTime @default(now()) @db.Timestamp(0)
+  updatedAt    DateTime @default(now()) @updatedAt @db.Timestamp(0)
+
+  tutor             User               @relation("ClassroomTeacher", fields: [tutorId], references: [id])
+  creator           User               @relation("ClassroomCreator", fields: [createdBy], references: [id])
+  coverMedia        Media?             @relation(fields: [coverMediaId], references: [id])
+  classroomStudents ClassroomStudent[]
+  joinRequests      JoinRequest[]
+  lessons           Lesson[]
+}
+
+model ClassroomStudent {
+  classroomId Int
+  studentId   Int
+  joinedAt    DateTime @default(now()) @db.Timestamp(0)
+  status      Int      @default(1) @db.SmallInt
+
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+  student   User      @relation(fields: [studentId], references: [id])
+
+  @@id([classroomId, studentId])
+}
+
+model JoinRequest {
+  id          Int       @id @default(autoincrement())
+  classroomId Int
+  studentId   Int
+  status      String    @default("pending") @db.VarChar(20)
+  requestedAt DateTime  @default(now()) @db.Timestamp(0)
+  handledAt   DateTime? @db.Timestamp(0)
+
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+  student   User      @relation("JoinRequestStudent", fields: [studentId], references: [id])
+}
+
+// =========================================
+// LESSONS & MATERIALS
+// =========================================
+
+enum LessonType {
+  lesson
+  exercise
+  quiz
+}
+
+model Lesson {
+  id          Int        @id @default(autoincrement())
+  classroomId Int
+  parentId    Int?
+  title       String     @db.VarChar(200)
+  content     String?
+  lessonType  LessonType @default(lesson)
+  orderIndex  Int        @default(0)
+  publishedAt DateTime?  @db.Timestamp(0)
+
+  classroom  Classroom  @relation(fields: [classroomId], references: [id])
+  materials  Material[]
+  exercises  Exercise[]
+  quizzes    Quiz[]
+  parent     Lesson?    @relation("LessonParent", fields: [parentId], references: [id])
+  subLessons Lesson[]   @relation("LessonParent")
+}
+
+model Material {
+  id         Int      @id @default(autoincrement())
+  lessonId   Int
+  title      String   @db.VarChar(200)
+  mediaId    Int
+  uploadedBy Int
+  uploadedAt DateTime @default(now()) @db.Timestamp(0)
+
+  lesson   Lesson? @relation(fields: [lessonId], references: [id])
+  media    Media   @relation(fields: [mediaId], references: [id])
+  uploader User    @relation(fields: [uploadedBy], references: [id])
+}
+
+// =========================================
+// EXERCISES & SUBMISSIONS
+// =========================================
+
+model Exercise {
+  id            Int       @id @default(autoincrement())
+  lessonId      Int
+  title         String    @db.VarChar(200)
+  description   String?
+  attachMediaId Int?
+  dueAt         DateTime? @db.Timestamp(0)
+  createdBy     Int
+  createdAt     DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamp(0)
+  deletedAt     DateTime? @db.Timestamp(0)
+
+  lesson      Lesson?              @relation(fields: [lessonId], references: [id])
+  attachMedia Media?               @relation(fields: [attachMediaId], references: [id])
+  creator     User                 @relation(fields: [createdBy], references: [id])
+  submissions ExerciseSubmission[]
+}
+
+model ExerciseSubmission {
+  id          Int       @id @default(autoincrement())
+  exerciseId  Int
+  studentId   Int
+  mediaId     Int
+  submittedAt DateTime  @default(now())
+  score       Decimal?  @db.Decimal(4, 2)
+  comment     String?   @db.VarChar(1000)
+  gradedAt    DateTime? @db.Timestamp(0)
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+  student  User     @relation(fields: [studentId], references: [id])
+  media    Media    @relation(fields: [mediaId], references: [id])
+
+  @@unique([exerciseId, studentId], map: "UQ_Submission_OnePerStudent")
+}
+
+// =========================================
+// QUIZZES
+// =========================================
+
+model Quiz {
+  id               Int       @id @default(autoincrement())
+  lessonId         Int
+  title            String    @db.VarChar(200)
+  description      String?
+  timeLimitSec     Int?
+  maxAttempts      Int       @default(1)
+  shuffleQuestions Boolean   @default(true)
+  shuffleOptions   Boolean   @default(true)
+  gradingMethod    String    @default("highest") @db.VarChar(20)
+  showAnswersAfter String    @default("after_due") @db.VarChar(20)
+  dueAt            DateTime? @db.Timestamp(0)
+  isPublished      Boolean   @default(false)
+  totalPoints      Decimal   @default(0) @db.Decimal(10, 2)
+  createdBy        Int
+  createdAt        DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt        DateTime  @default(now()) @updatedAt @db.Timestamp(0)
+  deletedAt        DateTime? @db.Timestamp(0)
+
+  lesson         Lesson              @relation(fields: [lessonId], references: [id])
+  creator        User                @relation(fields: [createdBy], references: [id])
+  sections       QuizSection[]
+  questionGroups QuizQuestionGroup[]
+  questions      QuizQuestion[]
+  attempts       QuizAttempt[]
+}
+
+model QuizSection {
+  id          Int     @id @default(autoincrement())
+  quizId      Int
+  title       String  @db.VarChar(200)
+  description String?
+  orderIndex  Int     @default(0)
+
+  quiz           Quiz                @relation(fields: [quizId], references: [id])
+  questionGroups QuizQuestionGroup[]
+  questions      QuizQuestion[]
+}
+
+model QuizQuestionGroup {
+  id            Int      @id @default(autoincrement())
+  quizId        Int
+  sectionId     Int?
+  title         String?  @db.VarChar(200)
+  introText     String?  @db.VarChar(1000)
+  orderIndex    Int      @default(0)
+  shuffleInside Boolean  @default(false)
+  pointsPolicy  String   @default("sum") @db.VarChar(20)
+  createdAt     DateTime @default(now()) @db.Timestamp(0)
+
+  quiz      Quiz                     @relation(fields: [quizId], references: [id])
+  section   QuizSection?             @relation(fields: [sectionId], references: [id])
+  questions QuizQuestion[]
+  medias    QuizQuestionGroupMedia[]
+}
+
+model QuizQuestion {
+  id           Int     @id @default(autoincrement())
+  quizId       Int
+  sectionId    Int?
+  groupId      Int?
+  content      String  @db.VarChar(1000)
+  explanation  String? @db.VarChar(1000)
+  questionType String  @default("single_choice") @db.VarChar(20)
+  points       Decimal @default(1.0) @db.Decimal(10, 2)
+  orderIndex   Int     @default(0)
+
+  quiz    Quiz                @relation(fields: [quizId], references: [id])
+  section QuizSection?        @relation(fields: [sectionId], references: [id])
+  group   QuizQuestionGroup?  @relation(fields: [groupId], references: [id])
+  options QuizOption[]
+  answers QuizAnswer[]
+  medias  QuizQuestionMedia[]
+}
+
+model QuizOption {
+  id         Int     @id @default(autoincrement())
+  questionId Int
+  content    String  @db.VarChar(500)
+  isCorrect  Boolean @default(false)
+  orderIndex Int     @default(0)
+
+  question QuizQuestion      @relation(fields: [questionId], references: [id])
+  answers  QuizAnswer[]
+  medias   QuizOptionMedia[]
+}
+
+model QuizAttempt {
+  id            Int       @id @default(autoincrement())
+  quizId        Int
+  studentId     Int
+  startedAt     DateTime  @default(now()) @db.Timestamp(0)
+  submittedAt   DateTime? @db.Timestamp(0)
+  status        String    @default("in_progress") @db.VarChar(20)
+  scoreRaw      Decimal?  @db.Decimal(10, 2)
+  scoreScaled10 Decimal?  @db.Decimal(4, 2)
+
+  quiz    Quiz         @relation(fields: [quizId], references: [id])
+  student User         @relation(fields: [studentId], references: [id])
+  answers QuizAnswer[]
+}
+
+model QuizAnswer {
+  attemptId  Int
+  questionId Int
+  optionId   Int
+
+  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question QuizQuestion @relation(fields: [questionId], references: [id])
+  option   QuizOption   @relation(fields: [optionId], references: [id])
+
+  @@id([attemptId, questionId, optionId])
+}
+
+// =========================================
+// MEDIA RELATIONS
+// =========================================
+
+model QuizQuestionGroupMedia {
+  id        Int      @id @default(autoincrement())
+  groupId   Int
+  mediaId   Int
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+
+  group QuizQuestionGroup @relation(fields: [groupId], references: [id])
+  media Media             @relation(fields: [mediaId], references: [id])
+
+  @@unique([groupId, mediaId], map: "UQ_QQGroupMed")
+}
+
+model QuizQuestionMedia {
+  id         Int      @id @default(autoincrement())
+  questionId Int
+  mediaId    Int
+  createdAt  DateTime @default(now()) @db.Timestamp(0)
+
+  question QuizQuestion @relation(fields: [questionId], references: [id])
+  media    Media        @relation(fields: [mediaId], references: [id])
+
+  @@unique([questionId, mediaId], map: "UQ_QQMed")
+}
+
+model QuizOptionMedia {
+  id        Int      @id @default(autoincrement())
+  optionId  Int
+  mediaId   Int
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+
+  option QuizOption @relation(fields: [optionId], references: [id])
+  media  Media      @relation(fields: [mediaId], references: [id])
+
+  @@unique([optionId, mediaId], map: "UQ_QOMed")
+}
