@@ -1,33 +1,28 @@
+import { Role, User } from '@prisma/client'
+import { PrismaService } from './../services/prisma.service'
 import { Injectable } from '@nestjs/common'
-import { PrismaService } from '../services/prisma.service'
-import { Role } from '@prisma/client'
 
 @Injectable()
 export class SharedUserRepo {
     constructor(private readonly prismaService: PrismaService) {}
 
-    async findUnique(uniqueObject: { id: number } | { email: string }) {
+    async findUnique(uniqueObject: { id: number } | { email: string } | { phoneNumber: string }): Promise<User | null> {
         return this.prismaService.user.findUnique({
             where: uniqueObject,
         })
     }
 
-    async createUser(data: {
-        fullName: string
-        email: string
-        passwordHash: string
-        role: Role
-        phone: string
-    }) {
-        return this.prismaService.user.create({
-            data,
+    async getRoleNamesByUserId(userId: number): Promise<Role | null> {
+        const user = await this.prismaService.user.findUnique({
+            where: { id: userId },
         })
+        return user?.role || null
     }
 
-    async update(uniqueObject: { id: number } | { email: string }, data: { name?: string; passwordHash?: string }) {
+    async updateUser(user: Partial<User>): Promise<User> {
         return this.prismaService.user.update({
-            where: uniqueObject,
-            data,
+            where: { id: user.id },
+            data: user,
         })
     }
 }

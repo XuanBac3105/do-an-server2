@@ -1,9 +1,11 @@
 # version: '3.8'
 
 services:
-  db:
+  db-prod:
     image: postgres:15-alpine
     restart: always
+    env_file:
+      - .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -16,10 +18,12 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
+  app-prod:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
       DATABASE_URL: ${DATABASE_URL}
       NODE_ENV: production
@@ -27,7 +31,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      db:
+      db-prod:
         condition: service_healthy
     restart: always
     # healthcheck:

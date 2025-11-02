@@ -4,11 +4,14 @@ import z from 'zod'
 export const RegisterReqSchema = UserSchema.pick({
     email: true,
     fullName: true,
-    phone: true,
+    phoneNumber: true,
 })
     .extend({
-        password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
-        confirmPassword: z.string().min(6, 'Mật khẩu xác nhận phải có ít nhất 6 ký tự'),
+        otpCode: z.string({ message: 'Mã OTP không hợp lệ' }).length(6, 'Mã OTP phải có 6 ký tự'),
+        password: z.string({ message: 'Mật khẩu là bắt buộc' }).min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
+        confirmPassword: z
+            .string({ message: 'Mật khẩu xác nhận là bắt buộc' })
+            .min(6, 'Mật khẩu xác nhận phải có ít nhất 6 ký tự'),
     })
     .strict()
     .superRefine(({ confirmPassword, password }, ctx) => {
@@ -24,3 +27,7 @@ export const RegisterReqSchema = UserSchema.pick({
 export const RegisterResSchema = UserSchema.omit({
     passwordHash: true,
 })
+
+export const SendOtpReqSchema = UserSchema.pick({
+    email: true,
+}).strict()
