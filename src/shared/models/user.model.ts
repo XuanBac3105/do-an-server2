@@ -12,7 +12,7 @@ export const UserSchema = z.object({
         .min(2, 'Họ và tên phải có ít nhất 2 ký tự')
         .max(100, 'Họ và tên không được vượt quá 100 ký tự'),
     passwordHash: z.string(),
-    phone: z
+    phoneNumber: z
         .string()
         .min(10, 'Số điện thoại phải có ít nhất 10 chữ số')
         .max(15, 'Số điện thoại không được vượt quá 15 chữ số'),

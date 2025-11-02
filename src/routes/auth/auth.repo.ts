@@ -1,0 +1,49 @@
+import { Injectable } from '@nestjs/common'
+import { OtpCodeType, OtpRecord, User } from '@prisma/client'
+import { PrismaService } from 'src/shared/services/prisma.service'
+
+@Injectable()
+export class AuthRepo {
+    constructor(private readonly prismaService: PrismaService) {}
+
+    async createUser(data: {
+        email: string
+        passwordHash: string
+        phoneNumber: string
+        fullName: string
+    }): Promise<User> {
+        return await this.prismaService.user.create({
+            data,
+        })
+    }
+
+    async createOtpCode(data: {
+        email: string
+        otpCode: string
+        codeType: OtpCodeType
+        expiresAt: Date
+    }): Promise<void> {
+        await this.prismaService.otpRecord.create({
+            data,
+        })
+    }
+
+    async findOtpCode(data: { email: string; otpCode: string; codeType: OtpCodeType }): Promise<OtpRecord | null> {
+        return await this.prismaService.otpRecord.findFirst({
+            where: {
+                email: data.email,
+                otpCode: data.otpCode,
+                codeType: data.codeType,
+                expiresAt: {
+                    gt: new Date(),
+                },
+            },
+        })
+    }
+
+    async deleteOtpCode(data: { email: string }): Promise<void> {
+        await this.prismaService.otpRecord.deleteMany({
+            where: data,
+        })
+    }
+}

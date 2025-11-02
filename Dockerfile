@@ -7,6 +7,10 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm ci
 
+# Copy prisma schema and generate client
+COPY prisma ./prisma
+RUN npx prisma generate
+
 # Copy source and build
 COPY . .
 RUN npm run build
@@ -20,12 +24,12 @@ ENV NODE_ENV=production
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copy build output
-COPY --from=builder /usr/src/app/dist ./dist
-
-# If you rely on other runtime files (prisma client, public, etc.) copy them as needed
+# Copy prisma schema and generate client for production
 COPY prisma ./prisma
 RUN npx prisma generate
 
+# Copy build output from builder
+COPY --from=builder /usr/src/app/dist ./dist
+
 EXPOSE 3000
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main.js"]
