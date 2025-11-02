@@ -30,7 +30,6 @@ const configServer = configSchema.safeParse(process.env)
 
 if (!configServer.success) {
     console.log('Các giá trị khai báo trong .env không hợp lệ')
-    console.error(configServer.error)
     
     // Trong môi trường test, sử dụng giá trị mặc định thay vì exit
     if (process.env.NODE_ENV === 'test' || process.env.CI === 'true') {
