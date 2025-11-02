@@ -2,9 +2,9 @@ import { HttpException, Injectable, InternalServerErrorException, UnprocessableE
 import { AuthRepo } from './auth.repo'
 import { HashingService } from 'src/shared/services/hashing.service'
 import { SharedUserRepo } from 'src/shared/repos/shared-user.repo'
-import { OtpCodeType, User } from '@prisma/client';
 import { EmailService } from 'src/shared/services/email.service';
-import { RegisterReqDto, SendOtpReqDto } from './auth.dto';
+import { OtpCodeType, User } from '@prisma/client';
+import { ForgotPasswordReqDto, RegisterReqDto, ResetPasswordReqDto, SendOtpReqDto } from './auth.dto';
 import { ResponseMessage } from 'src/shared/types/response-message.type';
 
 @Injectable()
@@ -77,5 +77,51 @@ export class AuthService {
             phoneNumber: data.phoneNumber,
             fullName: data.fullName,
         })
+    }
+    async forgotPassword(data: ForgotPasswordReqDto): Promise<ResponseMessage> {
+        try {
+            const user = await this.sharedUserRepo.findUnique({
+                email: data.email,
+            })
+            if (!user) {
+                throw new UnprocessableEntityException('Người dùng không tồn tại')
+            }
+            await this.sendOtp({
+                email: data.email,
+                otpCodeType: OtpCodeType.password_reset,
+            })
+            return { message: 'Đã gửi mã xác thực quên mật khẩu.' }
+        } catch (error) {
+            throw new InternalServerErrorException('Đã xảy ra lỗi khi gửi mã OTP. Vui lòng thử lại sau.')
+        }
+    }
+
+    async resetPassword(data: ResetPasswordReqDto): Promise<ResponseMessage> {
+        const otpCode = await this.authRepo.findOtpCode({
+            email: data.email,
+            otpCode: data.otpCode,
+            codeType: OtpCodeType.password_reset,
+        })
+        if (!otpCode) {
+            throw new UnprocessableEntityException('Mã OTP không hợp lệ hoặc đã hết hạn')
+        }
+        await this.authRepo.deleteOtpCode({
+            email: data.email,
+        })
+        const user = await this.sharedUserRepo.findUnique({
+            email: data.email,
+        })
+        if (!user) {
+            throw new UnprocessableEntityException('Người dùng không tồn tại')
+        }
+        const passwordHash = await this.hashingService.hash(data.newPassword)
+        await this.sharedUserRepo.updateUser({
+            id: user.id,
+            passwordHash: passwordHash,
+        })
+        // await this.authRepo.deleteRefreshToken({
+        //     token: data.email,
+        // })
+        return { message: 'Đặt lại mật khẩu thành công.' }
     }
 }
