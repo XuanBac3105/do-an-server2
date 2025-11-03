@@ -4,8 +4,9 @@ import { HashingService } from 'src/shared/services/hashing.service'
 import { SharedUserRepo } from 'src/shared/repos/shared-user.repo'
 import { EmailService } from 'src/shared/services/email.service';
 import { OtpCodeType, User } from '@prisma/client';
-import { ForgotPasswordReqDto, RegisterReqDto, ResetPasswordReqDto, SendOtpReqDto } from './auth.dto';
+import { ForgotPasswordReqDto, LoginReqDto, LoginResDto, RefreshTokenReqDto, RefreshTokenResDto, RegisterReqDto, ResetPasswordReqDto, SendOtpReqDto } from './auth.dto';
 import { ResponseMessage } from 'src/shared/types/response-message.type';
+import { TokenService } from 'src/shared/services/token.service';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
         private readonly hashingService: HashingService,
         private readonly sharedUserRepo: SharedUserRepo,
         private readonly emailService: EmailService,
+        private readonly tokenService: TokenService,
     ) {}
 
     async sendOtp(data: { email: string; otpCodeType: OtpCodeType }): Promise<void> {
@@ -119,9 +121,67 @@ export class AuthService {
             id: user.id,
             passwordHash: passwordHash,
         })
-        // await this.authRepo.deleteRefreshToken({
-        //     token: data.email,
-        // })
+        await this.authRepo.deleteRefreshToken({
+            token: data.email,
+        })
         return { message: 'Đặt lại mật khẩu thành công.' }
+    }
+
+    async login(data: LoginReqDto): Promise<LoginResDto> {
+        const user = await this.sharedUserRepo.findUnique({
+            email: data.email,
+        })
+        if (!user) {
+            throw new UnprocessableEntityException('Email hoặc mật khẩu không đúng')
+        }
+        const isPasswordValid = await this.hashingService.compare(data.password, user.passwordHash)
+        if (!isPasswordValid) {
+            throw new UnprocessableEntityException('Email hoặc mật khẩu không đúng')
+        }
+        if (!user.isActive) {
+            throw new UnprocessableEntityException('Tài khoản đã bị vô hiệu hóa')
+        }
+        return await this.generateTokens({ userId: user.id })
+    }
+
+    async generateTokens(data: { userId: number }): Promise<LoginResDto> {
+        const [accessToken, refreshToken] = await Promise.all([
+            this.tokenService.signAccessToken({
+                userId: data.userId,
+            }),
+            this.tokenService.signRefreshToken({
+                userId: data.userId,
+            }),
+        ])
+        const decodedRefreshToken = await this.tokenService.verifyRefreshToken(refreshToken)
+        await this.authRepo.createRefreshToken({
+            token: refreshToken,
+            userId: data.userId,
+            expiresAt: new Date(decodedRefreshToken.exp * 1000),
+        })
+        return { accessToken, refreshToken }
+    }
+
+    async refreshToken(data: RefreshTokenReqDto): Promise<RefreshTokenResDto> {
+        const refreshToken = await this.authRepo.findRefreshToken({
+            token: data.refreshToken,
+        })
+        if (!refreshToken) {
+            throw new UnprocessableEntityException('Refresh token không hợp lệ')
+        }
+        const decodedRefreshToken = await this.tokenService.verifyRefreshToken(data.refreshToken)
+        if (!decodedRefreshToken) {
+            throw new UnprocessableEntityException('Refresh token không hợp lệ')
+        }
+        const user = await this.sharedUserRepo.findUnique({
+            id: decodedRefreshToken.userId,
+        })
+        if (!user) {
+            throw new UnprocessableEntityException('Người dùng không tồn tại')
+        }
+        await this.authRepo.deleteRefreshToken({
+            token: data.refreshToken,
+        })
+        return await this.generateTokens({ userId: user.id })
     }
 }
