@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { OtpCodeType, OtpRecord, User } from '@prisma/client'
+import { OtpCodeType, OtpRecord, RefreshToken, User } from '@prisma/client'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
 @Injectable()
@@ -43,6 +43,29 @@ export class AuthRepo {
 
     async deleteOtpCode(data: { email: string }): Promise<void> {
         await this.prismaService.otpRecord.deleteMany({
+            where: data,
+        })
+    }
+    
+    async createRefreshToken(data: { token: string; userId: number; expiresAt: Date }): Promise<void> {
+        await this.prismaService.refreshToken.create({
+            data,
+        })
+    }
+
+    async findRefreshToken(data: { token: string }): Promise<RefreshToken | null> {
+        return await this.prismaService.refreshToken.findFirst({
+            where: {
+                token: data.token,
+                expiresAt: {
+                    gt: new Date(),
+                },
+            },
+        })
+    }
+
+    async deleteRefreshToken(data: { token: string }): Promise<void> {
+        await this.prismaService.refreshToken.deleteMany({
             where: data,
         })
     }

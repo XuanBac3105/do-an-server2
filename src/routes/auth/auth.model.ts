@@ -54,3 +54,22 @@ export const ResetPasswordReqSchema = UserSchema.pick({
             })
         }
     })
+
+export const LoginReqSchema = UserSchema.pick({
+    email: true,
+})
+    .extend({
+        password: z.string({ message: 'Mật khẩu là bắt buộc' }).min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
+    })
+    .strict()
+
+export const LoginResSchema = z.object({
+    accessToken: z.string(),
+    refreshToken: z.string(),
+})
+
+export const RefreshTokenReqSchema = z.object({
+    refreshToken: z.string({ message: 'Refresh token là bắt buộc' }),
+})
+
+export const RefreshTokenResSchema = LoginResSchema

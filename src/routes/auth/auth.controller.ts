@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Put } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { ForgotPasswordReqDto, RegisterReqDto, RegisterResDto, ResetPasswordReqDto, SendOtpReqDto } from './auth.dto'
+import { ForgotPasswordReqDto, LoginReqDto, LoginResDto, RefreshTokenReqDto, RefreshTokenResDto, RegisterReqDto, RegisterResDto, ResetPasswordReqDto, SendOtpReqDto } from './auth.dto'
 import { ZodSerializerDto } from 'nestjs-zod'
 import { ResponseMessage } from 'src/shared/types/response-message.type'
 import { Throttle } from '@nestjs/throttler'
@@ -38,5 +38,19 @@ export class AuthController {
     @Put('reset-password')
     async resetPassword(@Body() body: ResetPasswordReqDto): Promise<ResponseMessage> {
         return await this.authService.resetPassword(body)
+    }
+
+    @Throttle({ default: { limit: 5, ttl: 300000 } })
+    @IsPublic()
+    @Post('login')
+    @ZodSerializerDto(LoginResDto)
+    async login(@Body() body: LoginReqDto): Promise<LoginResDto> {
+        return await this.authService.login(body)
+    }
+
+    @Post('refresh-token')
+    @ZodSerializerDto(RefreshTokenResDto)
+    async refreshToken(@Body() body: RefreshTokenReqDto): Promise<RefreshTokenResDto> {
+        return await this.authService.refreshToken(body)
     }
 }
