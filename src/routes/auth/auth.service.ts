@@ -4,7 +4,7 @@ import { HashingService } from 'src/shared/services/hashing.service'
 import { SharedUserRepo } from 'src/shared/repos/shared-user.repo'
 import { EmailService } from 'src/shared/services/email.service';
 import { OtpCodeType, User } from '@prisma/client';
-import { ForgotPasswordReqDto, LoginReqDto, LoginResDto, RefreshTokenReqDto, RefreshTokenResDto, RegisterReqDto, ResetPasswordReqDto, SendOtpReqDto } from './auth.dto';
+import { ForgotPasswordReqDto, LoginReqDto, LoginResDto, LogoutReqDto, RefreshTokenReqDto, RefreshTokenResDto, RegisterReqDto, ResetPasswordReqDto, SendOtpReqDto } from './auth.dto';
 import { ResponseMessage } from 'src/shared/types/response-message.type';
 import { TokenService } from 'src/shared/services/token.service';
 
@@ -183,5 +183,12 @@ export class AuthService {
             token: data.refreshToken,
         })
         return await this.generateTokens({ userId: user.id })
+    }
+
+    async logout(data: LogoutReqDto): Promise<ResponseMessage> {
+        await this.authRepo.deleteRefreshToken({
+            token: data.refreshToken,
+        })
+        return { message: 'Đăng xuất thành công.' }
     }
 }

@@ -73,3 +73,5 @@ export const RefreshTokenReqSchema = z.object({
 })
 
 export const RefreshTokenResSchema = LoginResSchema
+
+export const LogoutReqSchema = RefreshTokenReqSchema

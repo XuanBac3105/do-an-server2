@@ -1,6 +1,6 @@
-import { Body, Controller, Post, Put } from '@nestjs/common'
+import { Body, Controller, Delete, Post, Put } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { ForgotPasswordReqDto, LoginReqDto, LoginResDto, RefreshTokenReqDto, RefreshTokenResDto, RegisterReqDto, RegisterResDto, ResetPasswordReqDto, SendOtpReqDto } from './auth.dto'
+import { ForgotPasswordReqDto, LoginReqDto, LoginResDto, LogoutReqDto, RefreshTokenReqDto, RefreshTokenResDto, RegisterReqDto, RegisterResDto, ResetPasswordReqDto, SendOtpReqDto } from './auth.dto'
 import { ZodSerializerDto } from 'nestjs-zod'
 import { ResponseMessage } from 'src/shared/types/response-message.type'
 import { Throttle } from '@nestjs/throttler'
@@ -52,5 +52,10 @@ export class AuthController {
     @ZodSerializerDto(RefreshTokenResDto)
     async refreshToken(@Body() body: RefreshTokenReqDto): Promise<RefreshTokenResDto> {
         return await this.authService.refreshToken(body)
+    }
+
+    @Delete('logout')
+    async logout(@Body() body: LogoutReqDto): Promise<ResponseMessage> {
+        return await this.authService.logout(body)
     }
 }
