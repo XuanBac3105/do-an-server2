@@ -3,6 +3,7 @@ import {
     ForgotPasswordReqSchema,
     LoginReqSchema,
     LoginResSchema,
+    LogoutReqSchema,
     RefreshTokenReqSchema,
     RefreshTokenResSchema,
     RegisterReqSchema,
@@ -24,3 +25,5 @@ export class LoginResDto extends createZodDto(LoginResSchema) {}
 
 export class RefreshTokenReqDto extends createZodDto(RefreshTokenReqSchema) {}
 export class RefreshTokenResDto extends createZodDto(RefreshTokenResSchema) {}
+
+export class LogoutReqDto extends createZodDto(LogoutReqSchema) {}
