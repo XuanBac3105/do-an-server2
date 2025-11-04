@@ -18,3 +18,5 @@ export const GetAllUsersQuery = GetList.extend({
 export const ListUsersResSchema = BaseListResponse.extend({
     data: z.array(UserSchema.omit({ passwordHash: true })),
 });
+
+export const GetUserResSchema = UserSchema.omit({ passwordHash: true });
