@@ -33,8 +33,9 @@ const configSchema = z.object({
     MINIO_SECRET_KEY: z.string(),
     MINIO_USE_SSL: z
         .string()
-        .transform((v) => v === 'true' || v === '1' || v === 'yes')
-        .default('false' as any),
+        .optional()
+        .default('false')
+        .transform((v) => v === 'true' || v === '1' || v === 'yes'),
     MINIO_BUCKET_NAME: z.string(),
 })
 

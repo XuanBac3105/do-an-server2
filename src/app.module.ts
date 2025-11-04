@@ -12,6 +12,7 @@ import { CustomThrottlerGuard } from './shared/guards/throttler.guard'
 import { AccessTokenGuard } from './shared/guards/access-token.guard'
 import { ProfileModule } from './routes/profile/profile.module'
 import { MediaModule } from './routes/media/media.module'
+import { UserModule } from './routes/user/user.module';
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { MediaModule } from './routes/media/media.module'
         ]),
         ProfileModule,
         MediaModule,
+        UserModule,
     ],
     controllers: [AppController],
     providers: [
