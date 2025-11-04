@@ -10,7 +10,8 @@ import { ZodSerializerInterceptor } from 'nestjs-zod'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { CustomThrottlerGuard } from './shared/guards/throttler.guard'
 import { AccessTokenGuard } from './shared/guards/access-token.guard'
-import { ProfileModule } from './routes/profile/profile.module';
+import { ProfileModule } from './routes/profile/profile.module'
+import { MediaModule } from './routes/media/media.module'
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { ProfileModule } from './routes/profile/profile.module';
             },
         ]),
         ProfileModule,
+        MediaModule,
     ],
     controllers: [AppController],
     providers: [

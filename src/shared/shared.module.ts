@@ -5,13 +5,15 @@ import { TokenService } from './services/token.service'
 import { JwtModule } from '@nestjs/jwt'
 import { HashingService } from './services/hashing.service'
 import { EmailService } from './services/email.service'
+import { MinioService } from './services/minio.service'
 
 const sharedServices = [
     PrismaService,
     SharedUserRepo,
     TokenService,
     HashingService,
-    EmailService
+    EmailService,
+    MinioService,
 ]
 
 @Global()
