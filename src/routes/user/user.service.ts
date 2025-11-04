@@ -4,6 +4,7 @@ import { GetAllUsersQueryDto, GetUserResDto, ListUsersResDto } from './user.dto'
 import { SharedUserRepo } from 'src/shared/repos/shared-user.repo';
 import { buildListResponse, buildOrderBy, buildSearchFilter, calculatePagination } from 'src/shared/utils/query.util';
 import { Prisma } from '@prisma/client';
+import { ResponseMessage } from 'src/shared/types/response-message.type';
 
 @Injectable()
 export class UserService {
@@ -38,5 +39,23 @@ export class UserService {
             throw new UnprocessableEntityException('ID người dùng không hợp lệ');
         }
         return user;
+    }
+
+    async deactiveUser(id: number): Promise<ResponseMessage> {
+        const user = await this.sharedUserRepo.findUnique({ id });
+        if (!user) {
+            throw new UnprocessableEntityException('ID người dùng không hợp lệ');
+        }
+        await this.sharedUserRepo.updateUser({ id, isActive: false });
+        return { message: 'Đã vô hiệu hóa người dùng' };
+    }
+
+    async activateUser(id: number): Promise<ResponseMessage> {
+        const user = await this.sharedUserRepo.findUnique({ id });
+        if (!user) {
+            throw new UnprocessableEntityException('ID người dùng không hợp lệ');
+        }
+        await this.sharedUserRepo.updateUser({ id, isActive: true });
+        return { message: 'Đã kích hoạt người dùng' };
     }
 }
