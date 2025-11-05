@@ -8,6 +8,8 @@ import { EmailService } from './services/email.service'
 import { MinioService } from './services/minio.service'
 import { ClassroomRepo } from 'src/routes/classroom/classroom.repo'
 import { SharedClassroomRepo } from './repos/shared-classroom.repo'
+import { SharedClrStdRepo } from './repos/shared-clrstd.repo'
+import { SharedJreqRepo } from './repos/shared-join-req.repo'
 
 const sharedServices = [
     PrismaService,
@@ -18,6 +20,9 @@ const sharedServices = [
     MinioService,
     ClassroomRepo,
     SharedClassroomRepo,
+    SharedJreqRepo,
+    SharedClrStdRepo,
+    
 ]
 
 @Global()

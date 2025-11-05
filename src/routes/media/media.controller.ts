@@ -27,7 +27,7 @@ import {
     UploadResDto,
     StorageStatsResDto,
 } from './media.dto'
-import { CurrentUser } from 'src/shared/decorators/current.decorator'
+import { CurrentUser } from 'src/shared/decorators/current-use.decorator'
 import { UserDecoratorParam } from '../profile/profile.dto'
 import { ZodSerializerDto } from 'nestjs-zod'
 import { ResponseMessage } from 'src/shared/types/response-message.type'
