@@ -15,6 +15,7 @@ import { MediaModule } from './routes/media/media.module'
 import { UserModule } from './routes/user/user.module';
 import { ClassroomModule } from './routes/classroom/classroom.module';
 import { ClrstdModule } from './routes/clrstd/clrstd.module';
+import { LectureModule } from './routes/lecture/lecture.module';
 
 @Module({
     imports: [
@@ -31,6 +32,7 @@ import { ClrstdModule } from './routes/clrstd/clrstd.module';
         UserModule,
         ClassroomModule,
         ClrstdModule,
+        LectureModule,
     ],
     controllers: [AppController],
     providers: [
