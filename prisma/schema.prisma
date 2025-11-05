@@ -120,6 +120,7 @@ model ClassroomStudent {
   studentId   Int      
   joinedAt    DateTime @default(now()) @db.Timestamp(0)
   isActive    Boolean   @default(true)
+  deletedAt   DateTime? @db.Timestamp(0)
   
   classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
   student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -192,6 +193,7 @@ model Lecture {
   content    String?  @db.VarChar(2000)
   mediaId    Int?
   uploadedAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(0)
   deletedAt  DateTime? @db.Timestamp(0)
 
   parent    Lecture?   @relation("LectureParent", fields: [parentId], references: [id])

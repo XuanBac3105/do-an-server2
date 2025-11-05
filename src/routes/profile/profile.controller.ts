@@ -2,7 +2,7 @@ import { Body, Controller, Get, Put } from '@nestjs/common'
 import { ProfileService } from './profile.service'
 import { ChangePasswordDto, ProfileResDto, UpdateProfileDto, UserDecoratorParam } from './profile.dto'
 import { ZodSerializerDto } from 'nestjs-zod'
-import { CurrentUser } from 'src/shared/decorators/current.decorator'
+import { CurrentUser } from 'src/shared/decorators/current-use.decorator'
 
 @Controller('profile')
 export class ProfileController {
