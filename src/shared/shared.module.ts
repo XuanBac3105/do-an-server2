@@ -6,6 +6,8 @@ import { JwtModule } from '@nestjs/jwt'
 import { HashingService } from './services/hashing.service'
 import { EmailService } from './services/email.service'
 import { MinioService } from './services/minio.service'
+import { ClassroomRepo } from 'src/routes/classroom/classroom.repo'
+import { SharedClassroomRepo } from './repos/shared-classroom.repo'
 
 const sharedServices = [
     PrismaService,
@@ -14,6 +16,8 @@ const sharedServices = [
     HashingService,
     EmailService,
     MinioService,
+    ClassroomRepo,
+    SharedClassroomRepo,
 ]
 
 @Global()

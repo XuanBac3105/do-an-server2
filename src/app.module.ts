@@ -13,6 +13,7 @@ import { AccessTokenGuard } from './shared/guards/access-token.guard'
 import { ProfileModule } from './routes/profile/profile.module'
 import { MediaModule } from './routes/media/media.module'
 import { UserModule } from './routes/user/user.module';
+import { ClassroomModule } from './routes/classroom/classroom.module';
 
 @Module({
     imports: [
@@ -27,6 +28,7 @@ import { UserModule } from './routes/user/user.module';
         ProfileModule,
         MediaModule,
         UserModule,
+        ClassroomModule,
     ],
     controllers: [AppController],
     providers: [
