@@ -1,19 +1,30 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../services/prisma.service";
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from '../services/prisma.service'
 
 @Injectable()
 export class SharedClrStdRepo {
-    constructor(
-        private readonly prismaService: PrismaService
-    ) { }
+    constructor(private readonly prismaService: PrismaService) {}
 
-    async create(data: { classroomId: number; studentId: number; }) {
-        return this.prismaService.classroomStudent.create({
-            data,
-        });
+    async findUnique(where: { classroomId: number; studentId: number }) {
+        return this.prismaService.classroomStudent.findUnique({
+            where: {
+                classroomId_studentId: where,
+            },
+        })
     }
 
-    async update(data: { classroomId: number; studentId: number; isActive?: boolean; deletedAt?: Date }): Promise<void> {
+    async create(data: { classroomId: number; studentId: number }) {
+        return this.prismaService.classroomStudent.create({
+            data,
+        })
+    }
+
+    async update(data: {
+        classroomId: number
+        studentId: number
+        isActive?: boolean
+        deletedAt?: Date | null
+    }): Promise<void> {
         await this.prismaService.classroomStudent.update({
             where: {
                 classroomId_studentId: {
@@ -22,6 +33,6 @@ export class SharedClrStdRepo {
                 },
             },
             data,
-        });
+        })
     }
 }

@@ -13,29 +13,28 @@ import {
     ParseIntPipe,
     Res,
     StreamableFile,
+    Inject,
 } from '@nestjs/common'
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 import { Response } from 'express'
-import { MediaService } from './media.service'
-import {
-    UploadFileReqDto,
-    UploadMultipleFilesReqDto,
-    UpdateVisibilityReqDto,
-    MediaQueryDto,
-    RenameFileReqDto,
-    MediaResDto,
-    UploadResDto,
-    StorageStatsResDto,
-} from './media.dto'
-import { CurrentUser } from 'src/shared/decorators/current-use.decorator'
-import { UserDecoratorParam } from '../profile/profile.dto'
+import { UploadFileReqDto } from './dtos/requests/upload-file-req.dto'
+import { UploadMultipleFilesReqDto } from './dtos/requests/upload-multiple-files-req.dto'
+import { UpdateVisibilityReqDto } from './dtos/requests/update-visibility-req.dto'
+import { RenameFileReqDto } from './dtos/requests/rename-file-req.dto'
+import { MediaQueryDto } from './dtos/queries/media-query.dto'
+import { MediaResDto } from './dtos/responses/media-res.dto'
+import { UploadResDto } from './dtos/responses/upload-res.dto'
+import { StorageStatsResDto } from './dtos/responses/storage-stats-res.dto'
+import { CurrentUser } from 'src/shared/decorators/current-user.decorator'
 import { ZodSerializerDto } from 'nestjs-zod'
 import { ResponseMessage } from 'src/shared/types/response-message.type'
 import { Roles } from 'src/shared/decorators/roles.decorator'
+import { GetUserParamDto } from 'src/shared/dtos/get-user-param.dto'
+import type { IMediaService } from './services/media.interface.service'
 
 @Controller('media')
 export class MediaController {
-    constructor(private readonly mediaService: MediaService) {}
+    constructor(@Inject('IMediaService') private readonly mediaService: IMediaService) {}
 
     /**
      * Upload single file
@@ -46,7 +45,7 @@ export class MediaController {
     async uploadFile(
         @UploadedFile() file: Express.Multer.File,
         @Body() body: UploadFileReqDto,
-        @CurrentUser() user: UserDecoratorParam,
+        @CurrentUser() user: GetUserParamDto,
     ) {
         return await this.mediaService.uploadFile(file, user.id, body.visibility, body.metadata)
     }
@@ -59,7 +58,7 @@ export class MediaController {
     async uploadMultipleFiles(
         @UploadedFiles() files: Express.Multer.File[],
         @Body() body: UploadMultipleFilesReqDto,
-        @CurrentUser() user: UserDecoratorParam,
+        @CurrentUser() user: GetUserParamDto,
     ) {
         return await this.mediaService.uploadMultipleFiles(files, user.id, body.visibility)
     }
@@ -77,7 +76,7 @@ export class MediaController {
      * Get my media
      */
     @Get('my/list')
-    async getMyMedia(@CurrentUser() user: UserDecoratorParam, @Query() query: MediaQueryDto) {
+    async getMyMedia(@CurrentUser() user: GetUserParamDto, @Query() query: MediaQueryDto) {
         const skip = query.page && query.limit ? (query.page - 1) * query.limit : undefined
         const take = query.limit
 
@@ -93,7 +92,7 @@ export class MediaController {
      */
     @Get('my/stats')
     @ZodSerializerDto(StorageStatsResDto)
-    async getMyStats(@CurrentUser() user: UserDecoratorParam) {
+    async getMyStats(@CurrentUser() user: GetUserParamDto) {
         return await this.mediaService.getStorageStats(user.id)
     }
 
@@ -103,7 +102,7 @@ export class MediaController {
     @Get(':id/download')
     async downloadFile(
         @Param('id', ParseIntPipe) id: number,
-        @CurrentUser() user: UserDecoratorParam,
+        @CurrentUser() user: GetUserParamDto,
         @Res({ passthrough: true }) res: Response,
     ) {
         const { stream, filename, mimeType } = await this.mediaService.downloadFile(id, user.id, user.role)
@@ -122,7 +121,7 @@ export class MediaController {
     @Get(':id/download-url')
     async getDownloadUrl(
         @Param('id', ParseIntPipe) id: number,
-        @CurrentUser() user: UserDecoratorParam,
+        @CurrentUser() user: GetUserParamDto,
         @Query('expirySeconds') expirySeconds?: number,
     ) {
         const url = await this.mediaService.generateDownloadUrl(
@@ -142,7 +141,7 @@ export class MediaController {
     async updateVisibility(
         @Param('id', ParseIntPipe) id: number,
         @Body() body: UpdateVisibilityReqDto,
-        @CurrentUser() user: UserDecoratorParam,
+        @CurrentUser() user: GetUserParamDto,
     ) {
         return await this.mediaService.updateVisibility(id, body.visibility, user.id, user.role)
     }
@@ -155,7 +154,7 @@ export class MediaController {
     async renameFile(
         @Param('id', ParseIntPipe) id: number,
         @Body() body: RenameFileReqDto,
-        @CurrentUser() user: UserDecoratorParam,
+        @CurrentUser() user: GetUserParamDto,
     ) {
         return await this.mediaService.renameFile(id, body.newFileName, user.id, user.role)
     }
@@ -166,7 +165,7 @@ export class MediaController {
     @Delete(':id')
     async softDeleteMedia(
         @Param('id', ParseIntPipe) id: number,
-        @CurrentUser() user: UserDecoratorParam,
+        @CurrentUser() user: GetUserParamDto,
     ): Promise<ResponseMessage> {
         await this.mediaService.softDeleteMedia(id, user.id, user.role)
         return { message: 'Xóa file thành công' }
@@ -179,7 +178,7 @@ export class MediaController {
     @Roles('admin')
     async hardDeleteMedia(
         @Param('id', ParseIntPipe) id: number,
-        @CurrentUser() user: UserDecoratorParam,
+        @CurrentUser() user: GetUserParamDto,
     ): Promise<ResponseMessage> {
         await this.mediaService.hardDeleteMedia(id, user.id, user.role)
         return { message: 'Xóa vĩnh viễn file thành công' }
@@ -190,7 +189,7 @@ export class MediaController {
      */
     @Put(':id/restore')
     @ZodSerializerDto(MediaResDto)
-    async restoreMedia(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: UserDecoratorParam) {
+    async restoreMedia(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: GetUserParamDto) {
         return await this.mediaService.restoreMedia(id, user.id, user.role)
     }
 
