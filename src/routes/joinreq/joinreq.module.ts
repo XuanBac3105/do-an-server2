@@ -1,10 +1,19 @@
-import { Module } from '@nestjs/common';
-import { JoinreqController } from './joinreq.controller';
-import { JoinreqService } from './joinreq.service';
-import { JoinreqRepo } from './joinreq.repo';
+import { Module } from '@nestjs/common'
+import { JoinreqController } from './joinreq.controller'
+import { JoinreqService } from './services/joinreq.service'
+import { JoinreqRepo } from './repos/joinreq.repo'
 
 @Module({
-  controllers: [JoinreqController],
-  providers: [JoinreqService, JoinreqRepo]
+    controllers: [JoinreqController],
+    providers: [
+        {
+            provide: 'IJoinreqService',
+            useClass: JoinreqService,
+        },
+        {
+            provide: 'IJoinreqRepo',
+            useClass: JoinreqRepo,
+        },
+    ],
 })
 export class JoinreqModule {}
