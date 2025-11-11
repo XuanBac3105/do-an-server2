@@ -16,6 +16,7 @@ import { UserModule } from './routes/user/user.module';
 import { ClassroomModule } from './routes/classroom/classroom.module';
 import { ClrstdModule } from './routes/clrstd/clrstd.module';
 import { LectureModule } from './routes/lecture/lecture.module';
+import { ExerciseModule } from './routes/exercise/exercise.module';
 
 @Module({
     imports: [
@@ -33,6 +34,7 @@ import { LectureModule } from './routes/lecture/lecture.module';
         ClassroomModule,
         ClrstdModule,
         LectureModule,
+        ExerciseModule,
     ],
     controllers: [AppController],
     providers: [
