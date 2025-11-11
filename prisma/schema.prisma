@@ -19,12 +19,12 @@ enum OtpCodeType {
 }
 
 model OtpRecord {
-  id         BigInt    @id @default(autoincrement())
-  email      String    @db.VarChar(255)
-  otpCode    String    @db.Char(6)
-  codeType   OtpCodeType
-  createdAt  DateTime  @default(now()) @db.Timestamp(0)
-  expiresAt  DateTime  @db.Timestamp(0)
+  id        BigInt      @id @default(autoincrement())
+  email     String      @db.VarChar(255)
+  otpCode   String      @db.Char(6)
+  codeType  OtpCodeType
+  createdAt DateTime    @default(now()) @db.Timestamp(0)
+  expiresAt DateTime    @db.Timestamp(0)
 
   @@index([email, otpCode, codeType, expiresAt(sort: Desc)], map: "IX_OtpRecords_Email_Code")
 }
@@ -44,26 +44,26 @@ model RefreshToken {
 }
 
 model Media {
-  id             Int      @id @default(autoincrement())
-  disk           String   @db.VarChar(30)
-  bucket         String?  @db.VarChar(100)
-  objectKey      String   @db.VarChar(700)
-  mimeType       String?  @db.VarChar(100)
-  sizeBytes      BigInt?
-  visibility     String   @default("private") @db.VarChar(10) 
-  uploadedBy     Int?     
-  createdAt      DateTime @default(now()) @db.Timestamp(0)
-  deletedAt      DateTime? @db.Timestamp(0)
-  
-  uploader                    User?                        @relation("MediaUploadedBy", fields: [uploadedBy], references: [id])
-  userAvatars                 User[]                       @relation("UserAvatar")
-  classroomCovers             Classroom[]
-  exerciseAttachments         Exercise[]
-  exerciseSubmissions         ExerciseSubmission[]
-  quizQuestionGroupMedias     QuizQuestionGroupMedia[]
-  quizQuestionMedias          QuizQuestionMedia[]
-  quizOptionMedias            QuizOptionMedia[]
-  lectures                    Lecture[]
+  id         Int       @id @default(autoincrement())
+  disk       String    @db.VarChar(30)
+  bucket     String?   @db.VarChar(100)
+  objectKey  String    @db.VarChar(700)
+  mimeType   String?   @db.VarChar(100)
+  sizeBytes  BigInt?
+  visibility String    @default("private") @db.VarChar(10)
+  uploadedBy Int?
+  createdAt  DateTime  @default(now()) @db.Timestamp(0)
+  deletedAt  DateTime? @db.Timestamp(0)
+
+  uploader                User?                    @relation("MediaUploadedBy", fields: [uploadedBy], references: [id])
+  userAvatars             User[]                   @relation("UserAvatar")
+  classroomCovers         Classroom[]
+  exerciseAttachments     Exercise[]
+  exerciseSubmissions     ExerciseSubmission[]
+  quizQuestionGroupMedias QuizQuestionGroupMedia[]
+  quizQuestionMedias      QuizQuestionMedia[]
+  quizOptionMedias        QuizOptionMedia[]
+  lectures                Lecture[]
 
   @@unique([bucket, objectKey], map: "UQ_Media_Bucket_Key")
 }
@@ -74,25 +74,25 @@ enum Role {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  fullName     String   @db.VarChar(150)
-  email        String   @unique @db.VarChar(255)
-  passwordHash String   @db.VarChar(255)
-  phoneNumber  String   @unique @db.VarChar(30)
-  role         Role     @default(student)
-  avatarMediaId Int?    
-  isActive     Boolean  @default(true) 
-  createdAt    DateTime @default(now()) @db.Timestamp(0)
-  updatedAt    DateTime @default(now()) @updatedAt @db.Timestamp(0)
+  id            Int      @id @default(autoincrement())
+  fullName      String   @db.VarChar(150)
+  email         String   @unique @db.VarChar(255)
+  passwordHash  String   @db.VarChar(255)
+  phoneNumber   String   @unique @db.VarChar(30)
+  role          Role     @default(student)
+  avatarMediaId Int?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime @default(now()) @updatedAt @db.Timestamp(0)
 
-  avatarMedia               Media?     @relation("UserAvatar", fields: [avatarMediaId], references: [id])
-  uploadedMedia             Media[]                @relation("MediaUploadedBy")
-  classroomStudents         ClassroomStudent[]
-  joinRequests              JoinRequest[]          @relation("JoinRequestStudent")
-  exerciseSubmissions       ExerciseSubmission[]
-  quizAttempts              QuizAttempt[]
-  refreshTokens             RefreshToken[]
-  activityLogs              ActivityLog[]
+  avatarMedia         Media?               @relation("UserAvatar", fields: [avatarMediaId], references: [id])
+  uploadedMedia       Media[]              @relation("MediaUploadedBy")
+  classroomStudents   ClassroomStudent[]
+  joinRequests        JoinRequest[]        @relation("JoinRequestStudent")
+  exerciseSubmissions ExerciseSubmission[]
+  quizAttempts        QuizAttempt[]
+  refreshTokens       RefreshToken[]
+  activityLogs        ActivityLog[]
 }
 
 // =========================================
@@ -100,28 +100,28 @@ model User {
 // =========================================
 
 model Classroom {
-  id                Int       @id @default(autoincrement()) 
-  name              String    @unique @db.VarChar(200)
-  description       String?   @db.VarChar(2000)
-  coverMediaId      Int?
-  isArchived        Boolean   @default(false)
-  createdAt         DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt         DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-  deletedAt         DateTime? @db.Timestamp(0)
+  id           Int       @id @default(autoincrement())
+  name         String    @unique @db.VarChar(200)
+  description  String?   @db.VarChar(2000)
+  coverMediaId Int?
+  isArchived   Boolean   @default(false)
+  createdAt    DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt    DateTime  @default(now()) @updatedAt @db.Timestamp(0)
+  deletedAt    DateTime? @db.Timestamp(0)
 
-  coverMedia           Media?                 @relation(fields: [coverMediaId], references: [id])
-  classroomStudents    ClassroomStudent[]
-  joinRequests         JoinRequest[]
-  lessons              Lesson[]
+  coverMedia        Media?             @relation(fields: [coverMediaId], references: [id])
+  classroomStudents ClassroomStudent[]
+  joinRequests      JoinRequest[]
+  lessons           Lesson[]
 }
 
 model ClassroomStudent {
   classroomId Int
-  studentId   Int      
-  joinedAt    DateTime @default(now()) @db.Timestamp(0)
+  studentId   Int
+  joinedAt    DateTime  @default(now()) @db.Timestamp(0)
   isActive    Boolean   @default(true)
   deletedAt   DateTime? @db.Timestamp(0)
-  
+
   classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
   student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
@@ -135,13 +135,13 @@ enum JoinRequestStatus {
 }
 
 model JoinRequest {
-  id          Int       @id @default(autoincrement()) 
+  id          Int               @id @default(autoincrement())
   classroomId Int
   studentId   Int
   status      JoinRequestStatus @default(pending)
-  requestedAt DateTime  @default(now()) @db.Timestamp(0)
-  handledAt   DateTime? @db.Timestamp(0)
-  
+  requestedAt DateTime          @default(now()) @db.Timestamp(0)
+  handledAt   DateTime?         @db.Timestamp(0)
+
   classroom Classroom @relation(fields: [classroomId], references: [id])
   student   User      @relation("JoinRequestStudent", fields: [studentId], references: [id])
 
@@ -160,24 +160,26 @@ enum LessonType {
 }
 
 model Lesson {
-  id          Int         @id @default(autoincrement()) 
-  classroomId Int
-  lessonType  LessonType  @default(lecture)
-  lectureId   Int?
-  exerciseId  Int?
-  quizId      Int?
-  exerciseDueAt       DateTime?   @db.Timestamp(0)
-  quizStartAt         DateTime?   @db.Timestamp(0)
-  quizEndAt           DateTime?   @db.Timestamp(0)
-  orderIndex  Int         @default(0)
-  createdAt   DateTime    @default(now()) @db.Timestamp(0)
-  updatedAt   DateTime    @default(now()) @updatedAt @db.Timestamp(0)
-  deletedAt   DateTime?   @db.Timestamp(0)
+  id            Int        @id @default(autoincrement())
+  classroomId   Int
+  lessonType    LessonType @default(lecture)
+  lectureId     Int?
+  exerciseId    Int?
+  quizId        Int?
+  exerciseDueAt DateTime?  @db.Timestamp(0)
+  quizStartAt   DateTime?  @db.Timestamp(0)
+  quizEndAt     DateTime?  @db.Timestamp(0)
+  orderIndex    Int        @default(0)
+  createdAt     DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime   @default(now()) @updatedAt @db.Timestamp(0)
+  deletedAt     DateTime?  @db.Timestamp(0)
 
-  classroom Classroom  @relation(fields: [classroomId], references: [id], onDelete: Cascade)
-  lecture   Lecture?   @relation(fields: [lectureId], references: [id])
-  exercise  Exercise?   @relation(fields: [exerciseId], references: [id])
-  quiz      Quiz?      @relation(fields: [quizId], references: [id])
+  classroom           Classroom            @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  lecture             Lecture?             @relation(fields: [lectureId], references: [id])
+  exercise            Exercise?            @relation(fields: [exerciseId], references: [id])
+  quiz                Quiz?                @relation(fields: [quizId], references: [id])
+  exerciseSubmissions ExerciseSubmission[]
+  quizAttempts        QuizAttempt[]
 
   @@index([classroomId])
   @@index([lectureId])
@@ -185,22 +187,20 @@ model Lesson {
   @@index([quizId])
 }
 
-
 model Lecture {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   parentId   Int?
-  title      String   @db.VarChar(200)
-  content    String?  @db.VarChar(2000)
+  title      String    @db.VarChar(200)
+  content    String?   @db.VarChar(2000)
   mediaId    Int?
-  uploadedAt DateTime @default(now()) @db.Timestamp(0)
-  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(0)
+  uploadedAt DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt  DateTime  @default(now()) @updatedAt @db.Timestamp(0)
   deletedAt  DateTime? @db.Timestamp(0)
 
-  parent    Lecture?   @relation("LectureParent", fields: [parentId], references: [id])
-  children  Lecture[]  @relation("LectureParent")
-  media     Media?     @relation(fields: [mediaId], references: [id])
-  lessons   Lesson[]
-
+  parent   Lecture?  @relation("LectureParent", fields: [parentId], references: [id])
+  children Lecture[] @relation("LectureParent")
+  media    Media?    @relation(fields: [mediaId], references: [id])
+  lessons  Lesson[]
 }
 
 // =========================================
@@ -215,7 +215,7 @@ model Exercise {
   createdAt     DateTime  @default(now()) @db.Timestamp(0)
   updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamp(0)
   deletedAt     DateTime? @db.Timestamp(0)
-  
+
   attachMedia Media?               @relation(fields: [attachMediaId], references: [id])
   submissions ExerciseSubmission[]
   lessons     Lesson[]
@@ -223,6 +223,7 @@ model Exercise {
 
 model ExerciseSubmission {
   id          Int       @id @default(autoincrement())
+  lessonId    Int
   exerciseId  Int
   studentId   Int
   mediaId     Int
@@ -234,9 +235,11 @@ model ExerciseSubmission {
   exercise Exercise @relation(fields: [exerciseId], references: [id])
   student  User     @relation(fields: [studentId], references: [id])
   media    Media    @relation(fields: [mediaId], references: [id])
+  lesson   Lesson   @relation(fields: [lessonId], references: [id])
 
-  @@unique([exerciseId, studentId], map: "UQ_Submission_OnePerStudent")
+  @@unique([lessonId, studentId], map: "UQ_Submission_OnePerStudentPerLesson")
   @@index([exerciseId], map: "IX_Submissions_Exercise")
+  @@index([lessonId], map: "IX_Submissions_Lesson")
 }
 
 // =========================================
@@ -251,27 +254,24 @@ enum GradingMethod {
 }
 
 model Quiz {
-  id               Int       @id @default(autoincrement())
-  title            String    @db.VarChar(200)
+  id               Int           @id @default(autoincrement())
+  title            String        @db.VarChar(200)
   description      String?
-  timeLimitSec     Int?      @db.Integer
-  maxAttempts      Int       @default(1)
-  shuffleQuestions Boolean   @default(true)
-  shuffleOptions   Boolean   @default(true)
+  timeLimitSec     Int           @db.Integer
+  maxAttempts      Int           @default(1)
+  shuffleQuestions Boolean       @default(true)
+  shuffleOptions   Boolean       @default(true)
   gradingMethod    GradingMethod @default(first)
-  showAnswers      Boolean   @default(false)
-  dueAt            DateTime? @db.Timestamp(0)
-  isPublished      Boolean   @default(false)
-  totalPoints      Decimal   @default(0) @db.Decimal(10, 2)
-  createdAt        DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt        DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-  deletedAt        DateTime? @db.Timestamp(0)
+  showAnswers      Boolean       @default(false)
+  createdAt        DateTime      @default(now()) @db.Timestamp(0)
+  updatedAt        DateTime      @default(now()) @updatedAt @db.Timestamp(0)
+  deletedAt        DateTime?     @db.Timestamp(0)
 
-  sections           QuizSection[]
-  questionGroups     QuizQuestionGroup[]
-  questions          QuizQuestion[]
-  attempts           QuizAttempt[]
-  lessons            Lesson[]
+  sections       QuizSection[]
+  questionGroups QuizQuestionGroup[]
+  questions      QuizQuestion[]
+  attempts       QuizAttempt[]
+  lessons        Lesson[]
 }
 
 model QuizSection {
@@ -294,7 +294,6 @@ model QuizQuestionGroup {
   introText     String?  @db.VarChar(1000)
   orderIndex    Int      @default(0)
   shuffleInside Boolean  @default(false)
-  pointsPolicy  String   @default("sum") @db.VarChar(20)
   createdAt     DateTime @default(now()) @db.Timestamp(0)
 
   quiz      Quiz                     @relation(fields: [quizId], references: [id], onDelete: Cascade)
@@ -303,20 +302,25 @@ model QuizQuestionGroup {
   medias    QuizQuestionGroupMedia[]
 }
 
+enum QuestionType {
+  single_choice
+  multiple_choice
+}
+
 model QuizQuestion {
-  id           Int      @id @default(autoincrement())
+  id           Int          @id @default(autoincrement())
   quizId       Int
   sectionId    Int?
   groupId      Int?
-  content      String   @db.VarChar(1000)
-  explanation  String?  @db.VarChar(1000)
-  questionType String   @default("single_choice") @db.VarChar(20)
-  points       Decimal  @default(1.0) @db.Decimal(10, 2)
-  orderIndex   Int      @default(0)
+  content      String       @db.VarChar(1000)
+  explanation  String?      @db.VarChar(1000)
+  questionType QuestionType @default(single_choice)
+  points       Float        @default(1.0)
+  orderIndex   Int          @default(0)
 
-  quiz    Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  section QuizSection?       @relation(fields: [sectionId], references: [id], onDelete: SetNull)
-  group   QuizQuestionGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  section QuizSection?        @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  group   QuizQuestionGroup?  @relation(fields: [groupId], references: [id], onDelete: SetNull)
   options QuizOption[]
   answers QuizAnswer[]
   medias  QuizQuestionMedia[]
@@ -341,23 +345,26 @@ enum QuizAttemptStatus {
 }
 
 model QuizAttempt {
-  id            Int       @id @default(autoincrement())
+  id            Int               @id @default(autoincrement())
+  lessonId      Int
   quizId        Int
   studentId     Int
-  startedAt     DateTime  @default(now()) @db.Timestamp(0)
-  submittedAt   DateTime? @db.Timestamp(0)
+  startedAt     DateTime          @default(now()) @db.Timestamp(0)
+  submittedAt   DateTime?         @db.Timestamp(0)
   status        QuizAttemptStatus @default(in_progress)
-  scoreRaw      Decimal?  @db.Decimal(10, 2)
-  scoreScaled10 Decimal?  @db.Decimal(4, 2)
-  
+  scoreRaw      Decimal?          @db.Decimal(10, 2)
+  scoreScaled10 Decimal?          @db.Decimal(4, 2)
+
+  lesson  Lesson       @relation(fields: [lessonId], references: [id])
   quiz    Quiz         @relation(fields: [quizId], references: [id])
   student User         @relation(fields: [studentId], references: [id])
   answers QuizAnswer[]
 
   @@index([quizId], map: "IX_QuizAttempts_Quiz")
   @@index([studentId], map: "IX_QuizAttempts_Student")
+  @@index([lessonId], map: "IX_QuizAttempts_Lesson")
   @@index([status])
-  @@index([quizId, studentId, submittedAt(sort: Desc)]) // THÊM - để lấy lần làm bài gần nhất
+  @@index([lessonId, studentId, submittedAt(sort: Desc)]) // THÊM - để lấy lần làm bài gần nhất
 }
 
 model QuizAnswer {
@@ -377,10 +384,10 @@ model QuizAnswer {
 // =========================================
 
 model QuizQuestionGroupMedia {
-  id         Int      @id @default(autoincrement())
-  groupId    Int
-  mediaId    Int
-  createdAt  DateTime @default(now()) @db.Timestamp(0)
+  id        Int      @id @default(autoincrement())
+  groupId   Int
+  mediaId   Int
+  createdAt DateTime @default(now()) @db.Timestamp(0)
 
   group QuizQuestionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
   media Media             @relation(fields: [mediaId], references: [id], onDelete: Cascade)
@@ -401,10 +408,10 @@ model QuizQuestionMedia {
 }
 
 model QuizOptionMedia {
-  id         Int      @id @default(autoincrement())
-  optionId   Int
-  mediaId    Int
-  createdAt  DateTime @default(now()) @db.Timestamp(0)
+  id        Int      @id @default(autoincrement())
+  optionId  Int
+  mediaId   Int
+  createdAt DateTime @default(now()) @db.Timestamp(0)
 
   option QuizOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
   media  Media      @relation(fields: [mediaId], references: [id], onDelete: Cascade)
@@ -413,13 +420,13 @@ model QuizOptionMedia {
 }
 
 model ActivityLog {
-  id          BigInt   @id @default(autoincrement())
-  userId      Int
-  action      String   @db.VarChar(100)
-  entityType  String   @db.VarChar(50)
-  entityId    Int?
-  metadata    String?  @db.Text
-  createdAt   DateTime @default(now()) @db.Timestamp(0)
+  id         BigInt   @id @default(autoincrement())
+  userId     Int
+  action     String   @db.VarChar(100)
+  entityType String   @db.VarChar(50)
+  entityId   Int?
+  metadata   String?  @db.Text
+  createdAt  DateTime @default(now()) @db.Timestamp(0)
 
   user User @relation(fields: [userId], references: [id])
 
