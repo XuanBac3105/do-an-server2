@@ -17,6 +17,7 @@ import { ClassroomModule } from './routes/classroom/classroom.module';
 import { ClrstdModule } from './routes/clrstd/clrstd.module';
 import { LectureModule } from './routes/lecture/lecture.module';
 import { ExerciseModule } from './routes/exercise/exercise.module';
+import { QuizModule } from './routes/quiz/quiz.module';
 
 @Module({
     imports: [
@@ -35,6 +36,7 @@ import { ExerciseModule } from './routes/exercise/exercise.module';
         ClrstdModule,
         LectureModule,
         ExerciseModule,
+        QuizModule,
     ],
     controllers: [AppController],
     providers: [
