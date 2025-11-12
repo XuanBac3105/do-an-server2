@@ -7,6 +7,8 @@ pipeline {
         DOCKER_TAG = "${BUILD_NUMBER}"
         DOCKER_HUB_CREDENTIALS = 'dockerhub-credentials'
         NODE_VERSION = '22'
+        // Dummy DATABASE_URL cho prisma generate và build (không cần connect thực sự)
+        DATABASE_URL = 'postgresql://dummy:dummy@localhost:5432/dummy'
     }
     
     stages {
@@ -47,8 +49,6 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 script {
-                    // Tạm thời skip tests nếu đang gặp vấn đề
-                    // Uncomment dòng dưới để chạy tests
                     try {
                         if (isUnix()) {
                             sh 'npm run test -- --passWithNoTests'
