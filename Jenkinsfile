@@ -2,11 +2,9 @@ pipeline {
     agent any
     
     environment {
-        // Thay 'your-dockerhub-username' bằng username Docker Hub của bạn
         DOCKER_HUB_USERNAME = 'dinhtrieuxtnd'
         DOCKER_IMAGE = "${DOCKER_HUB_USERNAME}/do-an-server"
         DOCKER_TAG = "${BUILD_NUMBER}"
-        // ID của credentials đã tạo trong Jenkins (bước hướng dẫn bên dưới)
         DOCKER_HUB_CREDENTIALS = 'dockerhub-credentials'
     }
     
@@ -22,8 +20,10 @@ pipeline {
             steps {
                 echo 'Installing dependencies...'
                 script {
-                    docker.image('node:18-alpine').inside {
+                    if (isUnix()) {
                         sh 'npm ci'
+                    } else {
+                        bat 'npm ci'
                     }
                 }
             }
@@ -33,8 +33,10 @@ pipeline {
             steps {
                 echo 'Generating Prisma Client...'
                 script {
-                    docker.image('node:18-alpine').inside {
+                    if (isUnix()) {
                         sh 'npx prisma generate'
+                    } else {
+                        bat 'npx prisma generate'
                     }
                 }
             }
@@ -44,8 +46,10 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 script {
-                    docker.image('node:18-alpine').inside {
+                    if (isUnix()) {
                         sh 'npm run test'
+                    } else {
+                        bat 'npm run test'
                     }
                 }
             }
@@ -55,8 +59,10 @@ pipeline {
             steps {
                 echo 'Building application...'
                 script {
-                    docker.image('node:18-alpine').inside {
+                    if (isUnix()) {
                         sh 'npm run build'
+                    } else {
+                        bat 'npm run build'
                     }
                 }
             }
@@ -66,7 +72,6 @@ pipeline {
             steps {
                 echo 'Building Docker image...'
                 script {
-                    // Build image với tag BUILD_NUMBER và latest
                     dockerImage = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
                     docker.build("${DOCKER_IMAGE}:latest")
                 }
@@ -77,7 +82,6 @@ pipeline {
             steps {
                 echo 'Logging in to Docker Hub...'
                 script {
-                    // Login vào Docker Hub sử dụng credentials đã lưu
                     docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_HUB_CREDENTIALS}") {
                         echo 'Successfully logged in to Docker Hub'
                     }
@@ -90,7 +94,6 @@ pipeline {
                 echo 'Pushing Docker image to Docker Hub...'
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_HUB_CREDENTIALS}") {
-                        // Push cả 2 tags: BUILD_NUMBER và latest
                         dockerImage.push("${DOCKER_TAG}")
                         dockerImage.push("latest")
                         echo "Successfully pushed ${DOCKER_IMAGE}:${DOCKER_TAG} and ${DOCKER_IMAGE}:latest"
@@ -106,10 +109,17 @@ pipeline {
             steps {
                 echo 'Deploying to development environment...'
                 script {
-                    sh """
-                        docker-compose -f docker-compose.dev.yml down || true
-                        docker-compose -f docker-compose.dev.yml up -d
-                    """
+                    if (isUnix()) {
+                        sh '''
+                            docker-compose -f docker-compose.dev.yml down || true
+                            docker-compose -f docker-compose.dev.yml up -d
+                        '''
+                    } else {
+                        bat '''
+                            docker-compose -f docker-compose.dev.yml down
+                            docker-compose -f docker-compose.dev.yml up -d
+                        '''
+                    }
                 }
             }
         }
@@ -121,10 +131,17 @@ pipeline {
             steps {
                 echo 'Deploying to production environment...'
                 script {
-                    sh """
-                        docker-compose -f docker-compose.prod.yml down || true
-                        docker-compose -f docker-compose.prod.yml up -d
-                    """
+                    if (isUnix()) {
+                        sh '''
+                            docker-compose -f docker-compose.prod.yml down || true
+                            docker-compose -f docker-compose.prod.yml up -d
+                        '''
+                    } else {
+                        bat '''
+                            docker-compose -f docker-compose.prod.yml down
+                            docker-compose -f docker-compose.prod.yml up -d
+                        '''
+                    }
                 }
             }
         }
@@ -133,11 +150,11 @@ pipeline {
     post {
         success {
             echo 'Pipeline executed successfully!'
-            // Có thể thêm notification ở đây (Slack, Email, etc.)
+            echo "Docker Image: ${DOCKER_IMAGE}:${DOCKER_TAG}"
+            echo "Docker Hub: https://hub.docker.com/r/${DOCKER_HUB_USERNAME}/do-an-server"
         }
         failure {
             echo 'Pipeline failed!'
-            // Có thể thêm notification ở đây
         }
         always {
             echo 'Cleaning up workspace...'
