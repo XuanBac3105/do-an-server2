@@ -68,7 +68,8 @@ export class QuizService implements IQuizService {
         return await this.quizRepo.update(id, {
             title: data.title,
             description: data.description ?? existingQuiz.description,
-            timeLimitSec: data.timeLimitSec,maxAttempts: data.maxAttempts ?? existingQuiz.maxAttempts,
+            timeLimitSec: data.timeLimitSec,
+            maxAttempts: data.maxAttempts ?? existingQuiz.maxAttempts,
             shuffleQuestions: data.shuffleQuestions ?? existingQuiz.shuffleQuestions,
             shuffleOptions: data.shuffleOptions ?? existingQuiz.shuffleOptions,
             gradingMethod: data.gradingMethod ?? existingQuiz.gradingMethod,

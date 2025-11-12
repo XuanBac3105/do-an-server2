@@ -1,15 +1,16 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Inject } from '@nestjs/common'
 import { MinioService } from 'src/shared/services/minio.service'
 import { Media } from '@prisma/client'
-import { UploadFileOptions } from 'src/shared/types/upload.type'
 import type { IMediaRepo } from '../repos/media.interface.repo'
 import { IMediaService } from './media.interface.service'
+import { SharedMediaRepo } from 'src/shared/repos/shared-media.repo'
 
 @Injectable()
 export class MediaService implements IMediaService {
     constructor(
         @Inject('IMediaRepo') private readonly mediaRepo: IMediaRepo,
         private readonly minioService: MinioService,
+        private readonly sharedMediaRepo: SharedMediaRepo,
     ) {}
 
     /**
@@ -22,14 +23,12 @@ export class MediaService implements IMediaService {
         metadata?: Record<string, string>,
     ): Promise<Media & { url: string }> {
         // Upload file lên MinIO
-        const uploadOptions: UploadFileOptions = {
+        const uploadResult = await this.minioService.uploadFile({
             file: file.buffer,
             fileName: file.originalname,
             mimeType: file.mimetype,
             metadata,
-        }
-
-        const uploadResult = await this.minioService.uploadFile(uploadOptions)
+        })
 
         // Tạo media record trong database
         const media = await this.mediaRepo.create({
@@ -66,7 +65,7 @@ export class MediaService implements IMediaService {
      * Lấy media theo ID
      */
     async getMediaById(id: number, includeRelations: boolean = false): Promise<Media & { url: string }> {
-        const media = await this.mediaRepo.findById(id, includeRelations)
+        const media = await this.sharedMediaRepo.findById(id, includeRelations)
         if (!media) {
             throw new NotFoundException('Media không tồn tại')
         }
@@ -102,7 +101,7 @@ export class MediaService implements IMediaService {
      * Download file
      */
     async downloadFile(id: number, userId: number, userRole: string) {
-        const media = await this.mediaRepo.findById(id)
+        const media = await this.sharedMediaRepo.findById(id)
         if (!media) {
             throw new NotFoundException('Media không tồn tại')
         }
@@ -130,7 +129,7 @@ export class MediaService implements IMediaService {
      * Xóa file (soft delete)
      */
     async softDeleteMedia(id: number, userId: number, userRole: string): Promise<Media> {
-        const media = await this.mediaRepo.findById(id)
+        const media = await this.sharedMediaRepo.findById(id)
         if (!media) {
             throw new NotFoundException('Media không tồn tại')
         }
@@ -153,7 +152,7 @@ export class MediaService implements IMediaService {
      * Xóa vĩnh viễn file (hard delete)
      */
     async hardDeleteMedia(id: number, userId: number, userRole: string): Promise<void> {
-        const media = await this.mediaRepo.findById(id)
+        const media = await this.sharedMediaRepo.findById(id)
         if (!media) {
             throw new NotFoundException('Media không tồn tại')
         }
@@ -180,7 +179,7 @@ export class MediaService implements IMediaService {
      * Restore file đã bị soft delete
      */
     async restoreMedia(id: number, userId: number, userRole: string): Promise<Media> {
-        const media = await this.mediaRepo.findById(id)
+        const media = await this.sharedMediaRepo.findById(id)
         if (!media) {
             throw new NotFoundException('Media không tồn tại')
         }
@@ -202,7 +201,7 @@ export class MediaService implements IMediaService {
         userId: number,
         userRole: string,
     ): Promise<Media> {
-        const media = await this.mediaRepo.findById(id)
+        const media = await this.sharedMediaRepo.findById(id)
         if (!media) {
             throw new NotFoundException('Media không tồn tại')
         }
@@ -224,7 +223,7 @@ export class MediaService implements IMediaService {
         userId: number,
         userRole: string,
     ): Promise<Media & { url: string }> {
-        const media = await this.mediaRepo.findById(id)
+        const media = await this.sharedMediaRepo.findById(id)
         if (!media) {
             throw new NotFoundException('Media không tồn tại')
         }
@@ -314,7 +313,7 @@ export class MediaService implements IMediaService {
         userRole: string,
         expirySeconds: number = 3600,
     ): Promise<string> {
-        const media = await this.mediaRepo.findById(id)
+        const media = await this.sharedMediaRepo.findById(id)
         if (!media) {
             throw new NotFoundException('Media không tồn tại')
         }

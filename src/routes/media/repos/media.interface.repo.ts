@@ -2,7 +2,6 @@ import { Media, Prisma } from '@prisma/client'
 
 export interface IMediaRepo {
     create(data: Prisma.MediaCreateInput): Promise<Media>
-    findById(id: number, includeRelations?: boolean): Promise<Media | null>
     findByBucketAndKey(bucket: string, objectKey: string): Promise<Media | null>
     findByUploader(
         uploaderId: number,

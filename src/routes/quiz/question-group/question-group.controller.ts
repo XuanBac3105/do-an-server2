@@ -10,7 +10,10 @@ import { DeleteQuestionGroupReqDto } from './dtos/requests/delete-question-group
 import { UpdateQuestionGroupReqDto } from './dtos/requests/update-question-group-req.dto'
 import { QuestionGroupResDto } from './dtos/responses/question-group-res.dto'
 import type { IQuestionGroupService } from './services/question-group.interface.service'
+import { AttachMediaToQuestionGroupReqDto } from './dtos/requests/attach-media-req.dto'
+import { DetachMediaFromQuestionGroupReqDto } from './dtos/requests/detach-media-req.dto'
 
+@UseGuards(RoleGuard)
 @Controller('quiz/:id/question-group')
 export class QuestionGroupController {
     constructor(
@@ -18,7 +21,6 @@ export class QuestionGroupController {
         private readonly questionGroupService: IQuestionGroupService,
     ) {}
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Post()
     @ZodSerializerDto(QuestionGroupResDto)
@@ -29,7 +31,6 @@ export class QuestionGroupController {
         return await this.questionGroupService.create(param.id, body)
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Put()
     @ZodSerializerDto(QuestionGroupResDto)
@@ -37,10 +38,21 @@ export class QuestionGroupController {
         return await this.questionGroupService.update(body)
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Delete()
     async delete(@Body() body: DeleteQuestionGroupReqDto): Promise<ResponseMessage> {
         return await this.questionGroupService.delete(body.id)
+    }
+
+    @Roles(Role.admin)
+    @Post('attach-media')
+    async attachMedia(@Body() body: AttachMediaToQuestionGroupReqDto): Promise<ResponseMessage> {
+        return await this.questionGroupService.attachMedias(body.groupId, body.mediaIds)
+    }
+
+    @Roles(Role.admin)
+    @Post('detach-media')
+    async detachMedia(@Body() body: DetachMediaFromQuestionGroupReqDto): Promise<ResponseMessage> {
+        return await this.questionGroupService.detachMedias(body.groupId, body.mediaIds)
     }
 }

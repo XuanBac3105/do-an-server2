@@ -17,27 +17,6 @@ export class MediaRepo implements IMediaRepo {
     }
 
     /**
-     * Tìm media theo ID với relations
-     */
-    async findById(id: number, includeRelations: boolean = false): Promise<Media | null> {
-        return await this.prisma.media.findUnique({
-            where: { id },
-            include: includeRelations
-                ? {
-                      uploader: {
-                          select: {
-                              id: true,
-                              fullName: true,
-                              email: true,
-                              role: true,
-                          },
-                      },
-                  }
-                : undefined,
-        })
-    }
-
-    /**
      * Tìm media theo bucket và objectKey
      */
     async findByBucketAndKey(bucket: string, objectKey: string): Promise<Media | null> {

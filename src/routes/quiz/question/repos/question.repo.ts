@@ -2,6 +2,7 @@ import { QuestionType, QuizQuestion } from "@prisma/client";
 import { IQuestionRepo } from "./question.interface.repo";
 import { PrismaService } from "src/shared/services/prisma.service";
 import { Injectable } from "@nestjs/common";
+import { ResponseMessage } from "src/shared/types/response-message.type";
 
 @Injectable()
 export class QuestionRepo implements IQuestionRepo {
@@ -33,9 +34,27 @@ export class QuestionRepo implements IQuestionRepo {
         });
     }
 
-    findById(id: number): Promise<QuizQuestion | null> {
+    findById(id: number, includeMedias: boolean = false): Promise<QuizQuestion | null> {
         return this.prismaService.quizQuestion.findUnique({
-            where: { id }
+            where: { id },
+            include: includeMedias ? {
+                medias: {
+                    include: {
+                        media: {
+                            include: {
+                                uploader: {
+                                    select: {
+                                        id: true,
+                                        fullName: true,
+                                        email: true,
+                                        role: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } : undefined
         });
     }
 
@@ -67,5 +86,50 @@ export class QuestionRepo implements IQuestionRepo {
         await this.prismaService.quizQuestion.delete({
             where: { id }
         });
+    }
+
+    async attachMedias(questionId: number, mediaIds: number[]): Promise<ResponseMessage> {
+        await this.prismaService.quizQuestionMedia.createMany({
+            data: mediaIds.map(mediaId => ({
+                questionId,
+                mediaId
+            })),
+            skipDuplicates: true
+        });
+
+        return { message: 'Đính kèm media thành công' };
+    }
+
+    async detachMedias(questionId: number, mediaIds: number[]): Promise<ResponseMessage> {
+        await this.prismaService.quizQuestionMedia.deleteMany({
+            where: {
+                questionId,
+                mediaId: { in: mediaIds }
+            }
+        });
+
+        return { message: 'Gỡ media thành công' };
+    }
+
+    async getMedias(questionId: number): Promise<any[]> {
+        const medias = await this.prismaService.quizQuestionMedia.findMany({
+            where: { questionId },
+            include: {
+                media: {
+                    include: {
+                        uploader: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                                email: true,
+                                role: true,
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return medias.map(m => m.media);
     }
 }

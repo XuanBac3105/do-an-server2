@@ -10,4 +10,6 @@ export interface IQuestionOptionService {
     ): Promise<QuizOption>;
     update(data: UpdateQuestionOptionReqType): Promise<QuizOption>;
     delete(id: number): Promise<ResponseMessage>;
+    attachMedias(optionId: number, mediaIds: number[]): Promise<ResponseMessage>;
+    detachMedias(optionId: number, mediaIds: number[]): Promise<ResponseMessage>;
 }

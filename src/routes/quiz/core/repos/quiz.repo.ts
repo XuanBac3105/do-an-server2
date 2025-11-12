@@ -6,7 +6,7 @@ import { QuizDetailResType } from '../dtos/responses/quiz-detail-res.dto'
 
 @Injectable()
 export class QuizRepo implements IQuizRepo {
-    constructor(private readonly prismaService: PrismaService) { }
+    constructor(private readonly prismaService: PrismaService) {}
 
     async create(data: {
         title: string

@@ -49,4 +49,22 @@ export class QuestionGroupService implements IQuestionGroupService {
         await this.questionGroupRepo.delete(id)
         return { message: 'Xóa nhóm câu hỏi thành công' }
     }
+
+    async attachMedias(groupId: number, mediaIds: number[]): Promise<ResponseMessage> {
+        const existing = await this.questionGroupRepo.findById(groupId)
+        if (!existing) {
+            throw new UnprocessableEntityException('Không tìm thấy nhóm câu hỏi.')
+        }
+
+        return await this.questionGroupRepo.attachMedias(groupId, mediaIds)
+    }
+
+    async detachMedias(groupId: number, mediaIds: number[]): Promise<ResponseMessage> {
+        const existing = await this.questionGroupRepo.findById(groupId)
+        if (!existing) {
+            throw new UnprocessableEntityException('Không tìm thấy nhóm câu hỏi.')
+        }
+
+        return await this.questionGroupRepo.detachMedias(groupId, mediaIds)
+    }
 }

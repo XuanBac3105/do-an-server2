@@ -10,7 +10,10 @@ import { UpdateQuestionReqDto } from './dtos/requests/update-question-req.dto';
 import { DeleteQuestionReqDto } from './dtos/requests/delete-question-req.dto';
 import { GetIdParamDto } from 'src/shared/dtos/get-id-param.dto';
 import { ResponseMessage } from 'src/shared/types/response-message.type';
+import { AttachMediaToQuestionReqDto } from './dtos/requests/attach-media-req.dto';
+import { DetachMediaFromQuestionReqDto } from './dtos/requests/detach-media-req.dto';
 
+@UseGuards(RoleGuard)
 @Controller('quiz/:id/question')
 export class QuestionController {
     constructor(
@@ -18,7 +21,6 @@ export class QuestionController {
         private readonly questionService: IQuestionService
     ) {}
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Post()
     @ZodSerializerDto(QuestionResDto)
@@ -26,7 +28,6 @@ export class QuestionController {
         return this.questionService.create(param.id, body);
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Put()
     @ZodSerializerDto(QuestionResDto)
@@ -34,10 +35,21 @@ export class QuestionController {
         return this.questionService.update(body);
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Delete()
     async deleteQuestion(@Body() body: DeleteQuestionReqDto): Promise<ResponseMessage> {
         return this.questionService.delete(body.id);
+    }
+
+    @Roles(Role.admin)
+    @Post('attach-media')
+    async attachMedia(@Body() body: AttachMediaToQuestionReqDto): Promise<ResponseMessage> {
+        return this.questionService.attachMedias(body.questionId, body.mediaIds);
+    }
+
+    @Roles(Role.admin)
+    @Post('detach-media')
+    async detachMedia(@Body() body: DetachMediaFromQuestionReqDto): Promise<ResponseMessage> {
+        return this.questionService.detachMedias(body.questionId, body.mediaIds);
     }
 }

@@ -1,6 +1,7 @@
 import { QuestionType } from "@prisma/client";
 import { createZodDto } from "nestjs-zod";
 import z from "zod";
+import { MediaResSchema } from "src/routes/media/dtos/responses/media-res.dto";
 
 export const QuestionSchema = z.object({
     id: z
@@ -43,6 +44,9 @@ export const QuestionSchema = z.object({
         .int({ message: "Chỉ số thứ tự phải là một số nguyên" })
         .nonnegative({ message: "Chỉ số thứ tự phải là một số nguyên không âm" })
         .default(0),
+    medias: z
+        .array(MediaResSchema)
+        .optional(),
 });
 
-export class QuestionResDto extends createZodDto(QuestionSchema) { }
+export class QuestionResDto extends createZodDto(QuestionSchema) {}

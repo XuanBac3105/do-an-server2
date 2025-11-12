@@ -18,6 +18,8 @@ import { ClrstdModule } from './routes/clrstd/clrstd.module';
 import { LectureModule } from './routes/lecture/lecture.module';
 import { ExerciseModule } from './routes/exercise/exercise.module';
 import { QuizModule } from './routes/quiz/quiz.module';
+import { LessonModule } from './routes/lesson/lesson.module';
+import { ExerciseSubmissionModule } from './routes/exercise-submission/exercise-submission.module';
 
 @Module({
     imports: [
@@ -37,6 +39,8 @@ import { QuizModule } from './routes/quiz/quiz.module';
         LectureModule,
         ExerciseModule,
         QuizModule,
+        LessonModule,
+        ExerciseSubmissionModule,
     ],
     controllers: [AppController],
     providers: [

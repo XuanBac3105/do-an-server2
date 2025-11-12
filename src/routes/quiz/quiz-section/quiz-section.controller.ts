@@ -11,6 +11,7 @@ import { UpdateQuizSectionReqDto } from './dtos/requests/update-quiz-section-req
 import { QuizSectionResDto } from './dtos/responses/quiz-section-res.dto'
 import type { IQuizSectionService } from './services/quiz-section.interface.service'
 
+@UseGuards(RoleGuard)
 @Controller('quiz/:id/quiz-section')
 export class QuizSectionController {
     constructor(
@@ -18,7 +19,6 @@ export class QuizSectionController {
         private readonly quizSectionService: IQuizSectionService,
     ) {}
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Post()
     @ZodSerializerDto(QuizSectionResDto)
@@ -29,7 +29,6 @@ export class QuizSectionController {
         return await this.quizSectionService.create(params.id, body)
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Put()
     @ZodSerializerDto(QuizSectionResDto)
@@ -37,7 +36,6 @@ export class QuizSectionController {
         return await this.quizSectionService.update(body)
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Delete()
     async delete(@Body() body: DeleteQuizSectionReqDto): Promise<ResponseMessage> {
