@@ -1,5 +1,6 @@
 import { createZodDto } from "nestjs-zod";
 import z from "zod";
+import { MediaResSchema } from "src/routes/media/dtos/responses/media-res.dto";
 
 export const QuestionGroupSchema = z.object({
     id: z
@@ -36,6 +37,9 @@ export const QuestionGroupSchema = z.object({
         .default(false),
     createdAt: z
         .date({ message: "Ngày tạo phải là một đối tượng Date hợp lệ" }),
+    medias: z
+        .array(MediaResSchema)
+        .optional(),
 });
 
 export class QuestionGroupResDto extends createZodDto(QuestionGroupSchema) {}

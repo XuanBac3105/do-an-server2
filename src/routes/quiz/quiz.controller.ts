@@ -13,6 +13,7 @@ import { UpdateQuizReqDto } from './core/dtos/requests/update-quiz-req.dto'
 import { ResponseMessage } from 'src/shared/types/response-message.type'
 import { QuizDetailResDto } from './core/dtos/responses/quiz-detail-res.dto'
 
+@UseGuards(RoleGuard)
 @Controller('quiz')
 export class QuizController {
     constructor(
@@ -20,15 +21,13 @@ export class QuizController {
         private readonly quizService: IQuizService,
     ) {}
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Post()
     @ZodSerializerDto(QuizResDto)
     async create(@Body() body: CreateQuizReqDto): Promise<QuizResDto> {
         return await this.quizService.create(body)
     }
-    
-    @UseGuards(RoleGuard)
+
     @Roles(Role.admin)
     @Get()
     @ZodSerializerDto(ListQuizzesResDto)
@@ -36,7 +35,6 @@ export class QuizController {
         return await this.quizService.getAll(query)
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Get(':id')
     @ZodSerializerDto(QuizDetailResDto)
@@ -44,7 +42,6 @@ export class QuizController {
         return await this.quizService.getById(params.id)
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Put(':id')
     @ZodSerializerDto(QuizResDto)
@@ -52,7 +49,6 @@ export class QuizController {
         return await this.quizService.update(params.id, body)
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Delete(':id')
     async delete(@Param() params: GetIdParamDto): Promise<ResponseMessage> {

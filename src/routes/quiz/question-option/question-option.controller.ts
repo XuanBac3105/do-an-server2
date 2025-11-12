@@ -10,7 +10,10 @@ import { UpdateQuestionOptionReqDto } from './dtos/requests/update-question-opti
 import { DeleteQuestionOptionReqDto } from './dtos/requests/delete-question-option-req.dto';
 import { GetIdParamDto } from 'src/shared/dtos/get-id-param.dto';
 import { ResponseMessage } from 'src/shared/types/response-message.type';
+import { AttachMediaToQuestionOptionReqDto } from './dtos/requests/attach-media-req.dto';
+import { DetachMediaFromQuestionOptionReqDto } from './dtos/requests/detach-media-req.dto';
 
+@UseGuards(RoleGuard)
 @Controller('question/:id/option')
 export class QuestionOptionController {
     constructor(
@@ -18,7 +21,6 @@ export class QuestionOptionController {
         private readonly questionOptionService: IQuestionOptionService
     ) {}
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Post()
     @ZodSerializerDto(QuestionOptionResDto)
@@ -26,7 +28,6 @@ export class QuestionOptionController {
         return this.questionOptionService.create(param.id, body);
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Put()
     @ZodSerializerDto(QuestionOptionResDto)
@@ -34,10 +35,21 @@ export class QuestionOptionController {
         return this.questionOptionService.update(body);
     }
 
-    @UseGuards(RoleGuard)
     @Roles(Role.admin)
     @Delete()
     async deleteOption(@Body() body: DeleteQuestionOptionReqDto): Promise<ResponseMessage> {
         return this.questionOptionService.delete(body.id);
+    }
+
+    @Roles(Role.admin)
+    @Post('attach-media')
+    async attachMedia(@Body() body: AttachMediaToQuestionOptionReqDto): Promise<ResponseMessage> {
+        return this.questionOptionService.attachMedias(body.optionId, body.mediaIds);
+    }
+
+    @Roles(Role.admin)
+    @Post('detach-media')
+    async detachMedia(@Body() body: DetachMediaFromQuestionOptionReqDto): Promise<ResponseMessage> {
+        return this.questionOptionService.detachMedias(body.optionId, body.mediaIds);
     }
 }

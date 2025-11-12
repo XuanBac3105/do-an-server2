@@ -10,4 +10,6 @@ export interface IQuestionService {
     ): Promise<QuizQuestion>;
     update(data: UpdateQuestionReqType): Promise<QuizQuestion>;
     delete(id: number): Promise<ResponseMessage>;
+    attachMedias(questionId: number, mediaIds: number[]): Promise<ResponseMessage>;
+    detachMedias(questionId: number, mediaIds: number[]): Promise<ResponseMessage>;
 }

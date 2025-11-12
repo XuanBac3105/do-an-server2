@@ -16,7 +16,7 @@ import {
     Inject,
 } from '@nestjs/common'
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
-import { Response } from 'express'
+import type { Response } from 'express'
 import { UploadFileReqDto } from './dtos/requests/upload-file-req.dto'
 import { UploadMultipleFilesReqDto } from './dtos/requests/upload-multiple-files-req.dto'
 import { UpdateVisibilityReqDto } from './dtos/requests/update-visibility-req.dto'

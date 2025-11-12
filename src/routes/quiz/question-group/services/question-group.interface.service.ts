@@ -7,4 +7,6 @@ export interface IQuestionGroupService {
     create(quizId: number, data: CreateQuestionGroupReqType): Promise<QuestionGroupResDto>
     update(data: UpdateQuestionGroupReqType): Promise<QuestionGroupResDto>
     delete(id: number): Promise<ResponseMessage>
+    attachMedias(groupId: number, mediaIds: number[]): Promise<ResponseMessage>
+    detachMedias(groupId: number, mediaIds: number[]): Promise<ResponseMessage>
 }

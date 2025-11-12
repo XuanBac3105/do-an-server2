@@ -1,4 +1,5 @@
 import { QuestionType, QuizQuestion } from "@prisma/client";
+import { ResponseMessage } from "src/shared/types/response-message.type";
 
 export interface IQuestionRepo {
     create(data: {
@@ -12,7 +13,7 @@ export interface IQuestionRepo {
         orderIndex?: number,
     }): Promise<QuizQuestion>
     
-    findById(id: number): Promise<QuizQuestion | null>
+    findById(id: number, includeMedias?: boolean): Promise<QuizQuestion | null>
     
     update(data: {
         id: number,
@@ -26,4 +27,10 @@ export interface IQuestionRepo {
     }): Promise<QuizQuestion>
     
     delete(id: number): Promise<void>
+
+    attachMedias(questionId: number, mediaIds: number[]): Promise<ResponseMessage>
+
+    detachMedias(questionId: number, mediaIds: number[]): Promise<ResponseMessage>
+
+    getMedias(questionId: number): Promise<any[]>
 }

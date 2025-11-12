@@ -14,7 +14,7 @@ export class QuestionService implements IQuestionService {
     ) { }
 
     async create(quizId: number, data: CreateQuestionReqType): Promise<QuizQuestion> {
-        return this.questionRepo.create({
+        return await this.questionRepo.create({
             quizId,
             content: data.content,
             questionType: data.questionType ?? QuestionType.single_choice,
@@ -52,5 +52,23 @@ export class QuestionService implements IQuestionService {
 
         await this.questionRepo.delete(id);
         return { message: 'Xóa câu hỏi thành công' };
+    }
+
+    async attachMedias(questionId: number, mediaIds: number[]): Promise<ResponseMessage> {
+        const existing = await this.questionRepo.findById(questionId);
+        if (!existing) {
+            throw new UnprocessableEntityException('Không tìm thấy câu hỏi.');
+        }
+
+        return await this.questionRepo.attachMedias(questionId, mediaIds);
+    }
+
+    async detachMedias(questionId: number, mediaIds: number[]): Promise<ResponseMessage> {
+        const existing = await this.questionRepo.findById(questionId);
+        if (!existing) {
+            throw new UnprocessableEntityException('Không tìm thấy câu hỏi.');
+        }
+
+        return await this.questionRepo.detachMedias(questionId, mediaIds);
     }
 }

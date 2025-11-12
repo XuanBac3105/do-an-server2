@@ -14,7 +14,7 @@ export class QuestionOptionService implements IQuestionOptionService {
     ) { }
 
     async create(questionId: number, data: CreateQuestionOptionReqType): Promise<QuizOption> {
-        return this.questionOptionRepo.create({
+        return await this.questionOptionRepo.create({
             questionId,
             content: data.content,
             isCorrect: data.isCorrect ?? false,
@@ -44,5 +44,23 @@ export class QuestionOptionService implements IQuestionOptionService {
 
         await this.questionOptionRepo.delete(id);
         return { message: 'Xóa lựa chọn thành công' };
+    }
+
+    async attachMedias(optionId: number, mediaIds: number[]): Promise<ResponseMessage> {
+        const existing = await this.questionOptionRepo.findById(optionId);
+        if (!existing) {
+            throw new UnprocessableEntityException('Không tìm thấy lựa chọn.');
+        }
+
+        return await this.questionOptionRepo.attachMedias(optionId, mediaIds);
+    }
+
+    async detachMedias(optionId: number, mediaIds: number[]): Promise<ResponseMessage> {
+        const existing = await this.questionOptionRepo.findById(optionId);
+        if (!existing) {
+            throw new UnprocessableEntityException('Không tìm thấy lựa chọn.');
+        }
+
+        return await this.questionOptionRepo.detachMedias(optionId, mediaIds);
     }
 }
