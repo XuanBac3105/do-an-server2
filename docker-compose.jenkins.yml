@@ -11,34 +11,17 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./:/workspace
+      # Docker socket cho Windows Docker Desktop
+      - //var/run/docker.sock:/var/run/docker.sock
+      - .:/workspace
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
     networks:
       - jenkins-network
     restart: unless-stopped
 
-  jenkins-agent:
-    image: jenkins/inbound-agent:latest
-    container_name: jenkins-agent
-    depends_on:
-      - jenkins
-    environment:
-      - JENKINS_URL=http://jenkins:8080
-      - JENKINS_AGENT_NAME=docker-agent
-      - JENKINS_AGENT_WORKDIR=/home/jenkins/agent
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - jenkins_agent_workspace:/home/jenkins/agent
-    networks:
-      - jenkins-network
-    restart: unless-stopped
-
 volumes:
   jenkins_home:
-    driver: local
-  jenkins_agent_workspace:
     driver: local
 
 networks:
