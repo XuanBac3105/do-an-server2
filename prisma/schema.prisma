@@ -160,19 +160,21 @@ enum LessonType {
 }
 
 model Lesson {
-  id            Int        @id @default(autoincrement())
-  classroomId   Int
-  lessonType    LessonType @default(lecture)
-  lectureId     Int?
-  exerciseId    Int?
-  quizId        Int?
-  exerciseDueAt DateTime?  @db.Timestamp(0)
-  quizStartAt   DateTime?  @db.Timestamp(0)
-  quizEndAt     DateTime?  @db.Timestamp(0)
-  orderIndex    Int        @default(0)
-  createdAt     DateTime   @default(now()) @db.Timestamp(0)
-  updatedAt     DateTime   @default(now()) @updatedAt @db.Timestamp(0)
-  deletedAt     DateTime?  @db.Timestamp(0)
+  id              Int        @id @default(autoincrement())
+  classroomId     Int
+  lessonType      LessonType
+  lectureId       Int?
+  exerciseId      Int?
+  quizId          Int?
+  exerciseDueAt   DateTime?  @db.Timestamp(0)
+  quizStartAt     DateTime?  @db.Timestamp(0)
+  quizEndAt       DateTime?  @db.Timestamp(0)
+  showQuizAnswers Boolean    @default(false)
+  showQuizScore   Boolean    @default(false)
+  orderIndex      Int        @default(0)
+  createdAt       DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt       DateTime   @default(now()) @updatedAt @db.Timestamp(0)
+  deletedAt       DateTime?  @db.Timestamp(0)
 
   classroom           Classroom            @relation(fields: [classroomId], references: [id], onDelete: Cascade)
   lecture             Lecture?             @relation(fields: [lectureId], references: [id])
@@ -228,7 +230,7 @@ model ExerciseSubmission {
   studentId   Int
   mediaId     Int
   submittedAt DateTime  @default(now())
-  score       Decimal?  @db.Decimal(4, 2)
+  score       Float?
   comment     String?   @db.VarChar(1000)
   gradedAt    DateTime? @db.Timestamp(0)
 
@@ -262,7 +264,6 @@ model Quiz {
   shuffleQuestions Boolean       @default(true)
   shuffleOptions   Boolean       @default(true)
   gradingMethod    GradingMethod @default(first)
-  showAnswers      Boolean       @default(false)
   createdAt        DateTime      @default(now()) @db.Timestamp(0)
   updatedAt        DateTime      @default(now()) @updatedAt @db.Timestamp(0)
   deletedAt        DateTime?     @db.Timestamp(0)
@@ -352,8 +353,8 @@ model QuizAttempt {
   startedAt     DateTime          @default(now()) @db.Timestamp(0)
   submittedAt   DateTime?         @db.Timestamp(0)
   status        QuizAttemptStatus @default(in_progress)
-  scoreRaw      Decimal?          @db.Decimal(10, 2)
-  scoreScaled10 Decimal?          @db.Decimal(4, 2)
+  scoreRaw      Float?
+  scoreScaled10 Float?
 
   lesson  Lesson       @relation(fields: [lessonId], references: [id])
   quiz    Quiz         @relation(fields: [quizId], references: [id])

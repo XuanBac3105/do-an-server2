@@ -20,6 +20,7 @@ import { ExerciseModule } from './routes/exercise/exercise.module';
 import { QuizModule } from './routes/quiz/quiz.module';
 import { LessonModule } from './routes/lesson/lesson.module';
 import { ExerciseSubmissionModule } from './routes/exercise-submission/exercise-submission.module';
+import { QuizAttemptModule } from './routes/quiz-attempt/quiz-attempt.module';
 
 @Module({
     imports: [
@@ -41,6 +42,7 @@ import { ExerciseSubmissionModule } from './routes/exercise-submission/exercise-
         QuizModule,
         LessonModule,
         ExerciseSubmissionModule,
+        QuizAttemptModule,
     ],
     controllers: [AppController],
     providers: [
