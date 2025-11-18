@@ -25,7 +25,6 @@ export const QuizSchema = z.object({
     shuffleQuestions: z.boolean({ message: 'Trộn câu hỏi phải là một giá trị boolean.' }).default(true),
     shuffleOptions: z.boolean({ message: 'Trộn lựa chọn phải là một giá trị boolean.' }).default(true),
     gradingMethod: z.enum(GradingMethod).default(GradingMethod.first),
-    showAnswers: z.boolean({ message: 'Hiển thị đáp án phải là một giá trị boolean.' }).default(false),
     createdAt: z.date({ message: 'Ngày tạo không hợp lệ.' }),
     updatedAt: z.date({ message: 'Ngày cập nhật không hợp lệ.' }),
     deletedAt: z.date({ message: 'Ngày xóa không hợp lệ.' }).nullable().optional(),

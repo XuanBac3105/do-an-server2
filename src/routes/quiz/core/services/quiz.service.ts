@@ -27,7 +27,6 @@ export class QuizService implements IQuizService {
             shuffleQuestions: data.shuffleQuestions ?? true,
             shuffleOptions: data.shuffleOptions ?? true,
             gradingMethod: data.gradingMethod ?? 'first',
-            showAnswers: data.showAnswers ?? false,
         })
     }
 
@@ -73,7 +72,6 @@ export class QuizService implements IQuizService {
             shuffleQuestions: data.shuffleQuestions ?? existingQuiz.shuffleQuestions,
             shuffleOptions: data.shuffleOptions ?? existingQuiz.shuffleOptions,
             gradingMethod: data.gradingMethod ?? existingQuiz.gradingMethod,
-            showAnswers: data.showAnswers ?? existingQuiz.showAnswers,
         })
     }
 
